@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+i# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -102,3 +102,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# idea
+.idea/
+
+# Icon
+Icon?
