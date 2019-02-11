@@ -1,6 +1,8 @@
 import time
 import numpy as np
+# module load cs909-python
+
 
 print('init')
 
-# module load cs909-python
+
