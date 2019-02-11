@@ -1,2 +1,2 @@
 # thirdeye
-A project to ensure seeing is believing
+An effort to ensure seeing remains believing
