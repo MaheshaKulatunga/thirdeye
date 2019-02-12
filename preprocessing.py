@@ -64,15 +64,15 @@ def get_largest_face_size(video):
 
         # Find all the faces and face encodings in the current frame of video
         face_locations_init = face_recognition.face_locations(rgb_frame_init)
+        if face_locations_init:
+            top_i, right_i, bottom_i, left_i = face_locations_init[0]
 
-        top_i, right_i, bottom_i, left_i = face_locations_init[0]
-
-        height_i = bottom_i-top_i
-        width_i = right_i-left_i
-        if height_i > largest_face_height_i:
-            largest_face_height_i = height_i
-        if width_i > largest_face_width_i:
-            largest_face_width_i = width_i
+            height_i = bottom_i-top_i
+            width_i = right_i-left_i
+            if height_i > largest_face_height_i:
+                largest_face_height_i = height_i
+            if width_i > largest_face_width_i:
+                largest_face_width_i = width_i
 
         count += 1
     return largest_face_width_i, largest_face_height_i
