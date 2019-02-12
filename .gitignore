@@ -110,6 +110,4 @@ venv.bak/
 Icon?
 
 # Data
-./Data
-Data/
 .DS_Store
