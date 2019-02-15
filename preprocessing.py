@@ -90,15 +90,28 @@ def crop_videos(file_path, box_bias):
     for index, filename in enumerate(os.listdir(file_path)):
         # If video file
         if filename.endswith(".mp4"):
-            facial_extraction(filename, box_bias)
+            facial_extraction(TRAIN_DEEPFAKES, filename, box_bias)
 
 
-def facial_extraction(file_path, box_bias):
+def get_frame_values(file_path):
+    frame_rates = []
+    for index, filename in enumerate(os.listdir(file_path)):
+        # If video file
+        if filename.endswith(".mp4"):
+            input_movie = init_video(file_path + filename)
+
+            length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
+
+            frame_rates = frame_rates + [length]
+
+    print(min(frame_rates))
+
+
+def facial_extraction(folder, file_path, box_bias):
     print('Dealing with video {}'.format(file_path))
-    input_movie = init_video(TRAIN_DEEPFAKES + file_path)
+    input_movie = init_video(folder + file_path)
 
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
-
     # width = int(input_movie.get(cv2.CAP_PROP_FRAME_WIDTH))  # float
     # height = int(input_movie.get(cv2.CAP_PROP_FRAME_HEIGHT))  # float
 
@@ -108,6 +121,7 @@ def facial_extraction(file_path, box_bias):
     frame_number = 0
     count = 0
     largest_face_width, largest_face_height = get_largest_face_size(input_movie)
+    frame_list = []
 
     input_movie = init_video(TRAIN_DEEPFAKES + file_path)
     output_movie = cv2.VideoWriter(TRAIN_SEPERATED_DF_FACES + file_path, fourcc, length, (largest_face_width, largest_face_height))
@@ -126,9 +140,10 @@ def facial_extraction(file_path, box_bias):
 
         # Find all the faces and face encodings in the current frame of video
         face_locations = face_recognition.face_locations(rgb_frame)
-        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+        # face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
         if face_locations:
+            print('Found face in frame {} of video {}.'.format(frame_number, file_path))
             top, right, bottom, left = face_locations[0]
 
             if (right - left) < largest_face_width:
@@ -138,23 +153,28 @@ def facial_extraction(file_path, box_bias):
                 bottom = bottom + (largest_face_height - (bottom - top))
 
             frame = frame[top:bottom, left:right]
+            frame_list = frame_list + [frame]
         else:
             print('Warning: Frame {} with missing face in video {}'.format(frame_number, file_path))
 
         # Frames as images?
         # crop_img = frame[top:bottom, left:right]
         # cv2.imwrite(TRAIN_SEPERATED_DF_FACES + str(count) + "test.png", crop_img)
-
-        # Write the resulting frames to the output video file
-        print("Writing frame {} / {}".format(frame_number, length))
-        output_movie.write(frame)
-        # frame_list = frame_list + [frame]
-
         count += 1
+
+    # Write the resulting frames to the output video file
+    if len(frame_list) >= 20:
+        for f in range(20):
+            print("Writing frame {} / {}".format(f, length))
+            output_movie.write(frame_list[f])
+    else:
+        print('Discarding invalid video {}'.format(file_path))
+
 
     # All done!
     input_movie.release()
     cv2.destroyAllWindows()
+    exit()
 
 if __name__ == "__main__":
     if len(os.listdir(TRAIN_DEEPFAKES)) == 0:
@@ -167,3 +187,6 @@ if __name__ == "__main__":
         print('Training Videos Detected')
 
         crop_videos(TRAIN_DEEPFAKES, 50)
+        get_frame_values(TRAIN_DEEPFAKES)
+        get_frame_values(TRAIN_SEPERATED_DF_FACES)
+
