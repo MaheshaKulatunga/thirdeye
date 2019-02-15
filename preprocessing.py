@@ -2,6 +2,7 @@ import time
 import numpy as np
 # module load cs909-python
 import os
+import subprocess
 import face_recognition
 import cv2
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -17,6 +18,12 @@ TRAIN_REAL = './Data/Train/REAL/'
 TEST_DEEPFAKES = './Data/Test/DF/'
 TEST_REAL = './Data/Test/Real/'
 
+TRAIN_FPS_DEEPFAKES = './Data/Raw/DF/FPS/'
+TRAIN_FPS_REAL = './Data/Raw/REAL/FPS/'
+
+TEST_FPS_DEEPFAKES = './Data/Test/DF/FPS/'
+TEST_FPS_REAL = './Data/Test/Real/FPS/'
+
 TRAIN_SEPERATED_DF_FACES = './Data/Train/DF/SEP/'
 TRAIN_SEPERATED_REAL_FACES = './Data/Train/REAL/SEP/'
 
@@ -24,19 +31,22 @@ TEST_SEPERATED_DF_FACES = './Data/Test/DF/SEP/'
 TEST_SEPERATED_REAL_FACES = './Data/Test/REAL/SEP/'
 
 
-def split_raw_videos(clip_size, file_path):
+def split_raw_videos(clip_size, file_path, fps_path, output_path):
     # Loop through files in folder
     for index, filename in enumerate(os.listdir(file_path)):
         # If video file
         if filename.endswith(".mp4"):
-            input_video_path = RAW_DEEPFAKES+filename
+            command = "ffmpeg -i {} -r 18 -y {}".format(file_path + filename, fps_path + filename)
+            subprocess.call(command, shell=True)
+
+            input_video_path = fps_path + filename
             # Import video
             with VideoFileClip(input_video_path) as video:
                 # Get video duration and calculate number of possible clips
                 clip_count = int(video.duration/clip_size)
                 # Split each clip and save
                 for clip in range(clip_count):
-                    output_video_path = '{}{}{}.mp4'.format(TRAIN_DEEPFAKES, index, clip)
+                    output_video_path = '{}{}{}.mp4'.format(output_path, index, clip)
                     start = clip
                     end = clip + clip_size
                     new = video.subclip(start, end)
@@ -93,23 +103,34 @@ def crop_videos(file_path, box_bias):
             facial_extraction(TRAIN_DEEPFAKES, filename, box_bias)
 
 
+
 def get_frame_values(file_path):
     frame_rates = []
     for index, filename in enumerate(os.listdir(file_path)):
         # If video file
         if filename.endswith(".mp4"):
             input_movie = init_video(file_path + filename)
-
             length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
-
             frame_rates = frame_rates + [length]
-
+            print(length)
     print(min(frame_rates))
+
+
+def standardise_fps(file_path):
+    for index, filename in enumerate(os.listdir(file_path)):
+        # If video file
+        if filename.endswith(".mp4"):
+            print(file_path + filename)
+            print(TRAIN_FPS_DEEPFAKES + filename)
+            command = "ffmpeg -i {} -r 20 -y {}".format(file_path + filename, TRAIN_FPS_DEEPFAKES + filename)
+            subprocess.call(command, shell=True)
 
 
 def facial_extraction(folder, file_path, box_bias):
     print('Dealing with video {}'.format(file_path))
     input_movie = init_video(folder + file_path)
+
+    # ffmpeg -y -r 24 -i seeing_noaudio.mp4 seeing.mp4
 
     length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
     # width = int(input_movie.get(cv2.CAP_PROP_FRAME_WIDTH))  # float
@@ -163,7 +184,11 @@ def facial_extraction(folder, file_path, box_bias):
         count += 1
 
     # Write the resulting frames to the output video file
-    if len(frame_list) >= 20:
+    if len(frame_list) == 20:
+        for f in range(20):
+            print("Writing frame {} / {}".format(f, length))
+            output_movie.write(frame_list[f])
+    if len(frame_list) > 20:
         for f in range(20):
             print("Writing frame {} / {}".format(f, length))
             output_movie.write(frame_list[f])
@@ -176,17 +201,19 @@ def facial_extraction(folder, file_path, box_bias):
     cv2.destroyAllWindows()
     exit()
 
+
 if __name__ == "__main__":
-    if len(os.listdir(TRAIN_DEEPFAKES)) == 0:
+    if len(os.listdir(TRAIN_DEEPFAKES)) < 1:
         print("Looking for raw videos")
         if len(os.listdir(RAW_DEEPFAKES)) == 0:
             print('No Raw Videos Found!')
         else:
-            split_raw_videos(1, RAW_DEEPFAKES)
+            split_raw_videos(1, RAW_DEEPFAKES, TRAIN_FPS_DEEPFAKES , TRAIN_DEEPFAKES)
     else:
         print('Training Videos Detected')
 
-        crop_videos(TRAIN_DEEPFAKES, 50)
-        get_frame_values(TRAIN_DEEPFAKES)
-        get_frame_values(TRAIN_SEPERATED_DF_FACES)
+        # crop_videos(TRAIN_DEEPFAKES, 50)
+        # standardise_fps(TRAIN_DEEPFAKES)
+        # get_frame_values(TRAIN_DEEPFAKES)
+        # get_frame_values(TRAIN_FPS_DEEPFAKES)
 
