@@ -122,7 +122,7 @@ def standardise_fps(file_path):
         if filename.endswith(".mp4"):
             print(file_path + filename)
             print(TRAIN_FPS_DEEPFAKES + filename)
-            command = "ffmpeg -i {} -r 20 -y {}".format(file_path + filename, TRAIN_FPS_DEEPFAKES + filename)
+            command = "ffmpeg -i {} -r 22 -y {}".format(file_path + filename, TRAIN_FPS_DEEPFAKES + filename)
             subprocess.call(command, shell=True)
 
 
@@ -203,7 +203,7 @@ def facial_extraction(folder, file_path, box_bias):
 
 
 if __name__ == "__main__":
-    if len(os.listdir(TRAIN_DEEPFAKES)) < 1:
+    if len(os.listdir(TRAIN_DEEPFAKES)) <= 1:
         print("Looking for raw videos")
         if len(os.listdir(RAW_DEEPFAKES)) == 0:
             print('No Raw Videos Found!')
@@ -214,6 +214,6 @@ if __name__ == "__main__":
 
         # crop_videos(TRAIN_DEEPFAKES, 50)
         # standardise_fps(TRAIN_DEEPFAKES)
-        # get_frame_values(TRAIN_DEEPFAKES)
+        get_frame_values(TRAIN_DEEPFAKES)
         # get_frame_values(TRAIN_FPS_DEEPFAKES)
 
