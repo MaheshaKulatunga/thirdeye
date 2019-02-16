@@ -36,7 +36,7 @@ def split_raw_videos(clip_size, file_path, fps_path, output_path):
     for index, filename in enumerate(os.listdir(file_path)):
         # If video file
         if filename.endswith(".mp4"):
-            command = "ffmpeg -i {} -r 18 -y {}".format(file_path + filename, fps_path + filename)
+            command = "ffmpeg -i {} -r 20 -y {}".format(file_path + filename, fps_path + filename)
             subprocess.call(command, shell=True)
 
             input_video_path = fps_path + filename
@@ -95,12 +95,12 @@ def init_video(filepath):
     return vid
 
 
-def crop_videos(file_path, output_folder, box_bias, box_size):
+def crop_videos(file_path, output_folder, box_bias, box_size, frames):
     # Loop through files in folder
     for index, filename in enumerate(os.listdir(file_path)):
         # If video file
         if filename.endswith(".mp4"):
-            facial_extraction(file_path, filename, output_folder, box_bias, box_size)
+            facial_extraction(file_path, filename, output_folder, box_bias, box_size, frames)
 
 
 def get_frame_values(file_path):
@@ -125,7 +125,7 @@ def get_frame_values(file_path):
 #             subprocess.call(command, shell=True)
 
 
-def facial_extraction(folder, file_name, output_folder, box_bias, box_size):
+def facial_extraction(folder, file_name, output_folder, box_bias, box_size, frames):
     print('Dealing with video {}'.format(file_name))
     input_movie = init_video(folder + file_name)
 
@@ -174,8 +174,12 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size):
 
             frame = frame[top - box_bias:bottom + box_bias, left - box_bias:right + box_bias]
 
-            frame = cv2.resize(frame, (box_size, box_size), interpolation=cv2.INTER_LINEAR)
-            frame_list = frame_list + [frame]
+            try:
+                frame = cv2.resize(frame, (box_size, box_size), interpolation=cv2.INTER_LINEAR)
+                frame_list = frame_list + [frame]
+
+            except Exception as e:
+                print(str(e))
 
         else:
             print('Warning: Frame {} with missing face in video {}'.format(frame_number, file_name))
@@ -186,8 +190,8 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size):
         count += 1
 
     # Write the resulting frames to the output video file
-    if len(frame_list) == 18:
-        for f in range(18):
+    if len(frame_list) == frames:
+        for f in range(frames):
             print("Writing frame {} / {}".format(f+1, length))
             output_movie.write(frame_list[f])
     else:
@@ -206,15 +210,16 @@ if __name__ == "__main__":
         else:
             start_time = time.time()
             split_raw_videos(1, RAW_DEEPFAKES, TRAIN_FPS_DEEPFAKES , TRAIN_DEEPFAKES)
+            print("--- %s seconds ---" % (time.time() - start_time))
 
     else:
         print('Training Videos Detected')
 
-        # get_frame_values(TRAIN_DEEPFAKES)
-        # get_frame_values(TRAIN_FPS_DEEPFAKES)
+    get_frame_values(TRAIN_DEEPFAKES)
+    get_frame_values(TRAIN_FPS_DEEPFAKES)
 
-        start_time = time.time()
-        crop_videos(TRAIN_DEEPFAKES, TRAIN_SEPERATED_DF_FACES, 20, 100)
-        print("--- %s seconds ---" % (time.time() - start_time))
+    start_time = time.time()
+    crop_videos(TRAIN_DEEPFAKES, TRAIN_SEPERATED_DF_FACES, 20, 100, 20)
+    print("--- %s seconds ---" % (time.time() - start_time))
 
 
