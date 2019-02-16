@@ -95,13 +95,12 @@ def init_video(filepath):
     return vid
 
 
-def crop_videos(file_path, box_bias):
+def crop_videos(file_path, output_folder, box_bias, box_size):
     # Loop through files in folder
     for index, filename in enumerate(os.listdir(file_path)):
         # If video file
         if filename.endswith(".mp4"):
-            facial_extraction(TRAIN_DEEPFAKES, filename, box_bias)
-
+            facial_extraction(file_path, filename, output_folder, box_bias, box_size)
 
 
 def get_frame_values(file_path):
@@ -115,20 +114,20 @@ def get_frame_values(file_path):
             print(length)
     print(min(frame_rates))
 
+# This is now done within the raw file processing
+# def standardise_fps(file_path):
+#     for index, filename in enumerate(os.listdir(file_path)):
+#         # If video file
+#         if filename.endswith(".mp4"):
+#             print(file_path + filename)
+#             print(TRAIN_FPS_DEEPFAKES + filename)
+#             command = "ffmpeg -i {} -r 22 -y {}".format(file_path + filename, TRAIN_FPS_DEEPFAKES + filename)
+#             subprocess.call(command, shell=True)
 
-def standardise_fps(file_path):
-    for index, filename in enumerate(os.listdir(file_path)):
-        # If video file
-        if filename.endswith(".mp4"):
-            print(file_path + filename)
-            print(TRAIN_FPS_DEEPFAKES + filename)
-            command = "ffmpeg -i {} -r 22 -y {}".format(file_path + filename, TRAIN_FPS_DEEPFAKES + filename)
-            subprocess.call(command, shell=True)
 
-
-def facial_extraction(folder, file_path, box_bias):
-    print('Dealing with video {}'.format(file_path))
-    input_movie = init_video(folder + file_path)
+def facial_extraction(folder, file_name, output_folder, box_bias, box_size):
+    print('Dealing with video {}'.format(file_name))
+    input_movie = init_video(folder + file_name)
 
     # ffmpeg -y -r 24 -i seeing_noaudio.mp4 seeing.mp4
 
@@ -144,8 +143,8 @@ def facial_extraction(folder, file_path, box_bias):
     largest_face_width, largest_face_height = get_largest_face_size(input_movie)
     frame_list = []
 
-    input_movie = init_video(TRAIN_DEEPFAKES + file_path)
-    output_movie = cv2.VideoWriter(TRAIN_SEPERATED_DF_FACES + file_path, fourcc, length, (largest_face_width, largest_face_height))
+    input_movie = init_video(folder + file_name)
+    output_movie = cv2.VideoWriter(output_folder + file_name, fourcc, length, (box_size, box_size))
 
     while True:
         # Grab a single frame of video
@@ -164,7 +163,7 @@ def facial_extraction(folder, file_path, box_bias):
         # face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
         if face_locations:
-            print('Found face in frame {} of video {}.'.format(frame_number, file_path))
+            print('Found face in frame {} of video {}.'.format(frame_number, file_name))
             top, right, bottom, left = face_locations[0]
 
             if (right - left) < largest_face_width:
@@ -173,10 +172,13 @@ def facial_extraction(folder, file_path, box_bias):
             if (bottom - top) < largest_face_height:
                 bottom = bottom + (largest_face_height - (bottom - top))
 
-            frame = frame[top:bottom, left:right]
+            frame = frame[top - box_bias:bottom + box_bias, left - box_bias:right + box_bias]
+
+            frame = cv2.resize(frame, (box_size, box_size), interpolation=cv2.INTER_LINEAR)
             frame_list = frame_list + [frame]
+
         else:
-            print('Warning: Frame {} with missing face in video {}'.format(frame_number, file_path))
+            print('Warning: Frame {} with missing face in video {}'.format(frame_number, file_name))
 
         # Frames as images?
         # crop_img = frame[top:bottom, left:right]
@@ -184,22 +186,16 @@ def facial_extraction(folder, file_path, box_bias):
         count += 1
 
     # Write the resulting frames to the output video file
-    if len(frame_list) == 20:
-        for f in range(20):
-            print("Writing frame {} / {}".format(f, length))
-            output_movie.write(frame_list[f])
-    if len(frame_list) > 20:
-        for f in range(20):
-            print("Writing frame {} / {}".format(f, length))
+    if len(frame_list) == 18:
+        for f in range(18):
+            print("Writing frame {} / {}".format(f+1, length))
             output_movie.write(frame_list[f])
     else:
-        print('Discarding invalid video {}'.format(file_path))
-
+        print('Discarding invalid video {}'.format(file_name))
 
     # All done!
     input_movie.release()
     cv2.destroyAllWindows()
-    exit()
 
 
 if __name__ == "__main__":
@@ -208,12 +204,17 @@ if __name__ == "__main__":
         if len(os.listdir(RAW_DEEPFAKES)) == 0:
             print('No Raw Videos Found!')
         else:
+            start_time = time.time()
             split_raw_videos(1, RAW_DEEPFAKES, TRAIN_FPS_DEEPFAKES , TRAIN_DEEPFAKES)
+
     else:
         print('Training Videos Detected')
 
-        # crop_videos(TRAIN_DEEPFAKES, 50)
-        # standardise_fps(TRAIN_DEEPFAKES)
-        get_frame_values(TRAIN_DEEPFAKES)
+        # get_frame_values(TRAIN_DEEPFAKES)
         # get_frame_values(TRAIN_FPS_DEEPFAKES)
+
+        start_time = time.time()
+        crop_videos(TRAIN_DEEPFAKES, TRAIN_SEPERATED_DF_FACES, 20, 100)
+        print("--- %s seconds ---" % (time.time() - start_time))
+
 
