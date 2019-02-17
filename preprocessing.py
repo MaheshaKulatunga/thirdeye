@@ -72,8 +72,8 @@ def crop_videos(file_path, output_folder, box_bias, box_size, frames):
     for index, filename in enumerate(os.listdir(file_path)):
         # If video file
         if filename.endswith(".mp4"):
-            facial_extraction(file_path, filename, output_folder, box_bias, box_size, frames)
-
+            facial_extraction(file_path, '120.mp4', output_folder, box_bias, box_size, frames)
+            exit()
 
 def facial_extraction(folder, file_name, output_folder, box_bias, box_size, frames):
     print('Dealing with video {}'.format(file_name))
@@ -94,7 +94,6 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size, fram
     frame_list = []
 
     input_movie = utilities.init_video(folder + file_name)
-    output_movie = cv2.VideoWriter(output_folder + file_name, fourcc, length, (box_size, box_size))
 
     while True:
         # Grab a single frame of video
@@ -141,6 +140,8 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size, fram
 
     # Write the resulting frames to the output video file
     if len(frame_list) == frames:
+        output_movie = cv2.VideoWriter(output_folder + file_name, fourcc, length, (box_size, box_size))
+
         for f in range(frames):
             print("Writing frame {} / {}".format(f+1, length))
             output_movie.write(frame_list[f])
