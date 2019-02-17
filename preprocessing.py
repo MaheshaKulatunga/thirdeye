@@ -6,54 +6,8 @@ import subprocess
 import face_recognition
 import cv2
 from moviepy.video.io.VideoFileClip import VideoFileClip
-
-# Constants
-# File Paths
-RAW_DEEPFAKES = './Data/Raw/DF/'
-RAW_REAL = './Data/Raw/REAL/'
-
-TRAIN_DEEPFAKES = './Data/Train/DF/'
-TRAIN_REAL = './Data/Train/REAL/'
-
-TEST_DEEPFAKES = './Data/Test/DF/'
-TEST_REAL = './Data/Test/Real/'
-
-TRAIN_FPS_DEEPFAKES = './Data/Raw/DF/FPS/'
-TRAIN_FPS_REAL = './Data/Raw/REAL/FPS/'
-
-TEST_FPS_DEEPFAKES = './Data/Test/DF/FPS/'
-TEST_FPS_REAL = './Data/Test/Real/FPS/'
-
-TRAIN_SEPERATED_DF_FACES = './Data/Train/DF/SEP/'
-TRAIN_SEPERATED_REAL_FACES = './Data/Train/REAL/SEP/'
-
-TEST_SEPERATED_DF_FACES = './Data/Test/DF/SEP/'
-TEST_SEPERATED_REAL_FACES = './Data/Test/REAL/SEP/'
-
-
-def split_raw_videos(clip_size, file_path, fps_path, output_path):
-    # Loop through files in folder
-    for index, filename in enumerate(os.listdir(file_path)):
-        # If video file
-        if filename.endswith(".mp4"):
-            command = "ffmpeg -i {} -r 20 -y {}".format(file_path + filename, fps_path + filename)
-            subprocess.call(command, shell=True)
-
-            input_video_path = fps_path + filename
-            # Import video
-            with VideoFileClip(input_video_path) as video:
-                # Get video duration and calculate number of possible clips
-                clip_count = int(video.duration/clip_size)
-                # Split each clip and save
-                for clip in range(clip_count):
-                    output_video_path = '{}{}{}.mp4'.format(output_path, index, clip)
-                    start = clip
-                    end = clip + clip_size
-                    new = video.subclip(start, end)
-                    new.write_videofile(output_video_path, audio_codec='aac')
-        else:
-            print('Warning: Incompatible file')
-    print('File split Complete')
+import utilities
+import constants
 
 
 def get_largest_face_size(video):
@@ -88,11 +42,29 @@ def get_largest_face_size(video):
     return largest_face_width_i, largest_face_height_i
 
 
-def init_video(filepath):
+def split_raw_videos(clip_size, file_path, fps_path, output_path):
+    # Loop through files in folder
+    for index, filename in enumerate(os.listdir(file_path)):
+        # If video file
+        if filename.endswith(".mp4"):
+            command = "ffmpeg -i {} -r 20 -y {}".format(file_path + filename, fps_path + filename)
+            subprocess.call(command, shell=True)
 
-    vid = cv2.VideoCapture(filepath)
-
-    return vid
+            input_video_path = fps_path + filename
+            # Import video
+            with VideoFileClip(input_video_path) as video:
+                # Get video duration and calculate number of possible clips
+                clip_count = int(video.duration/clip_size)
+                # Split each clip and save
+                for clip in range(clip_count):
+                    output_video_path = '{}{}{}.mp4'.format(output_path, index, clip)
+                    start = clip
+                    end = clip + clip_size
+                    new = video.subclip(start, end)
+                    new.write_videofile(output_video_path, audio_codec='aac')
+        else:
+            print('Warning: Incompatible file')
+    print('File split Complete')
 
 
 def crop_videos(file_path, output_folder, box_bias, box_size, frames):
@@ -103,31 +75,9 @@ def crop_videos(file_path, output_folder, box_bias, box_size, frames):
             facial_extraction(file_path, filename, output_folder, box_bias, box_size, frames)
 
 
-def get_frame_values(file_path):
-    frame_rates = []
-    for index, filename in enumerate(os.listdir(file_path)):
-        # If video file
-        if filename.endswith(".mp4"):
-            input_movie = init_video(file_path + filename)
-            length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
-            frame_rates = frame_rates + [length]
-            print(length)
-    print(min(frame_rates))
-
-# This is now done within the raw file processing
-# def standardise_fps(file_path):
-#     for index, filename in enumerate(os.listdir(file_path)):
-#         # If video file
-#         if filename.endswith(".mp4"):
-#             print(file_path + filename)
-#             print(TRAIN_FPS_DEEPFAKES + filename)
-#             command = "ffmpeg -i {} -r 22 -y {}".format(file_path + filename, TRAIN_FPS_DEEPFAKES + filename)
-#             subprocess.call(command, shell=True)
-
-
 def facial_extraction(folder, file_name, output_folder, box_bias, box_size, frames):
     print('Dealing with video {}'.format(file_name))
-    input_movie = init_video(folder + file_name)
+    input_movie = utilities.init_video(folder + file_name)
 
     # ffmpeg -y -r 24 -i seeing_noaudio.mp4 seeing.mp4
 
@@ -143,7 +93,7 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size, fram
     largest_face_width, largest_face_height = get_largest_face_size(input_movie)
     frame_list = []
 
-    input_movie = init_video(folder + file_name)
+    input_movie = utilities.init_video(folder + file_name)
     output_movie = cv2.VideoWriter(output_folder + file_name, fourcc, length, (box_size, box_size))
 
     while True:
@@ -203,23 +153,23 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size, fram
 
 
 if __name__ == "__main__":
-    if len(os.listdir(TRAIN_DEEPFAKES)) <= 1:
+    if len(os.listdir(constants.TRAIN_DEEPFAKES)) <= 1:
         print("Looking for raw videos")
-        if len(os.listdir(RAW_DEEPFAKES)) == 0:
+        if len(os.listdir(constants.RAW_DEEPFAKES)) == 0:
             print('No Raw Videos Found!')
         else:
             start_time = time.time()
-            split_raw_videos(1, RAW_DEEPFAKES, TRAIN_FPS_DEEPFAKES , TRAIN_DEEPFAKES)
+            split_raw_videos(1, constants.RAW_DEEPFAKES, constants.TRAIN_FPS_DEEPFAKES , constants.TRAIN_DEEPFAKES)
             print("--- %s seconds ---" % (time.time() - start_time))
 
     else:
         print('Training Videos Detected')
 
-    get_frame_values(TRAIN_DEEPFAKES)
-    get_frame_values(TRAIN_FPS_DEEPFAKES)
+    utilities.get_frame_values(constants.TRAIN_DEEPFAKES)
+    utilities.get_frame_values(constants.TRAIN_FPS_DEEPFAKES)
 
     start_time = time.time()
-    crop_videos(TRAIN_DEEPFAKES, TRAIN_SEPERATED_DF_FACES, 20, 100, 20)
+    crop_videos(constants.TRAIN_DEEPFAKES, constants.TRAIN_SEPERATED_DF_FACES, 20, 100, 20)
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
