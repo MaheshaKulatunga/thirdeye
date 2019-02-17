@@ -72,8 +72,8 @@ def crop_videos(file_path, output_folder, box_bias, box_size, frames):
     for index, filename in enumerate(os.listdir(file_path)):
         # If video file
         if filename.endswith(".mp4"):
-            facial_extraction(file_path, '120.mp4', output_folder, box_bias, box_size, frames)
-            exit()
+            facial_extraction(file_path, filename, output_folder, box_bias, box_size, frames)
+
 
 def facial_extraction(folder, file_name, output_folder, box_bias, box_size, frames):
     print('Dealing with video {}'.format(file_name))
