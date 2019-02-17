@@ -136,7 +136,7 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size, fram
 
         # Frames as images?
         # crop_img = frame[top:bottom, left:right]
-        # cv2.imwrite(TRAIN_SEPERATED_DF_FACES + str(count) + "test.png", crop_img)
+        # cv2.imwrite(TRAIN_SEPARATED_DF_FACES + str(count) + "test.png", crop_img)
         count += 1
 
     # Write the resulting frames to the output video file
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     utilities.get_frame_values(constants.TRAIN_FPS_DEEPFAKES)
 
     start_time = time.time()
-    crop_videos(constants.TRAIN_DEEPFAKES, constants.TRAIN_SEPERATED_DF_FACES, 20, 100, 20)
+    crop_videos(constants.TRAIN_DEEPFAKES, constants.TRAIN_SEPARATED_DF_FACES, 20, 100, 20)
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
