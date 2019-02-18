@@ -166,11 +166,18 @@ if __name__ == "__main__":
     else:
         print('Training Videos Detected')
 
-    utilities.get_frame_values(constants.TRAIN_DEEPFAKES)
-    utilities.get_frame_values(constants.TRAIN_FPS_DEEPFAKES)
+    if len(os.listdir(constants.TRAIN_SEPARATED_DF_FACES)) == 0:
+        print('Looking for videos to crop')
+        if len(os.listdir(constants.TRAIN_DEEPFAKES)) == 1:
+            print('Can\'nt find videos to crop!')
+        else:
+            utilities.get_frame_values(constants.TRAIN_DEEPFAKES)
+            utilities.get_frame_values(constants.TRAIN_FPS_DEEPFAKES)
 
-    start_time = time.time()
-    crop_videos(constants.TRAIN_DEEPFAKES, constants.TRAIN_SEPARATED_DF_FACES, 20, 100, 20)
-    print("--- %s seconds ---" % (time.time() - start_time))
+            start_time = time.time()
+            crop_videos(constants.TRAIN_DEEPFAKES, constants.TRAIN_SEPARATED_DF_FACES, 20, 100, 20)
+            print("--- %s seconds ---" % (time.time() - start_time))
+    else:
+        print('Cropped videos detected')
 
 
