@@ -153,6 +153,66 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size, fram
     cv2.destroyAllWindows()
 
 
+def motion_vector_extraction(input_folder, output_folder, frames, box_size):
+    # Loop through files in folder
+    for index, filename in enumerate(os.listdir(input_folder)):
+        # If video file
+        if filename.endswith(".mp4"):
+            print('Dealing with video {}'.format(filename))
+            input_movie = utilities.init_video(input_folder + filename)
+
+            length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
+
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+
+            frame_list = []
+
+            ret, frame1 = input_movie.read()
+            prvs = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
+            hsv = np.zeros_like(frame1)
+            hsv[..., 1] = 255
+
+            while (1):
+                ret, frame2 = input_movie.read()
+
+                if not ret:
+                    break
+
+                next = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+
+                flow = cv2.calcOpticalFlowFarneback(prvs, next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+
+                mag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+                hsv[..., 0] = ang * 180 / np.pi / 2
+                hsv[..., 2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
+                rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+                cv2.imshow('frame2', rgb)
+                # k = cv2.waitKey(30) & 0xff
+                # print(k)
+                # if k == 27:
+                #     break
+                # elif k == ord('s'):
+                # cv2.imwrite('opticalfb.png', frame2)
+                frame_list = frame_list + [rgb]
+                print(rgb.shape)
+                # cv2.imwrite('test.png', rgb)
+                prvs = next
+
+            # Write the resulting frames to the output video file
+            if len(frame_list) == (frames-1):
+                output_movie = cv2.VideoWriter(output_folder + filename, fourcc, length, (100, 100))
+
+                for f in range(frames-1):
+                    print("Writing frame {} / {}".format(f + 1, length))
+                    output_movie.write(frame_list[f])
+            else:
+                print('Discarding invalid video {}'.format(filename))
+
+            input_movie.release()
+            cv2.destroyAllWindows()
+
+
 if __name__ == "__main__":
     if len(os.listdir(constants.TRAIN_DEEPFAKES)) <= 1:
         print("Looking for raw videos")
@@ -180,4 +240,15 @@ if __name__ == "__main__":
     else:
         print('Cropped videos detected')
 
+    if len(os.listdir(constants.TRAIN_MV_DF_FACES)) == 0:
+        print('Looking to extract motion vectors')
+        if len(os.listdir(constants.TRAIN_SEPARATED_DF_FACES)) == 1:
+            print('Can\'nt find videos to extract motion vectors from!')
+        else:
+            start_time = time.time()
+            motion_vector_extraction(constants.TRAIN_SEPARATED_DF_FACES, constants.TRAIN_MV_DF_FACES, 20, 50)
+            print("--- %s seconds ---" % (time.time() - start_time))
+    else:
+        print('Motion vectors detected')
+        motion_vector_extraction(constants.TRAIN_SEPARATED_DF_FACES, constants.TRAIN_MV_DF_FACES, 20, 50)
 
