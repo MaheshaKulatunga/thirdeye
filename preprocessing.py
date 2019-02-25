@@ -187,7 +187,7 @@ def motion_vector_extraction(input_folder, output_folder, frames, box_size):
                 hsv[..., 2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
                 rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
-                cv2.imshow('frame2', rgb)
+                # cv2.imshow('frame2', rgb)
                 # k = cv2.waitKey(30) & 0xff
                 # print(k)
                 # if k == 27:
@@ -211,6 +211,7 @@ def motion_vector_extraction(input_folder, output_folder, frames, box_size):
 
             input_movie.release()
             cv2.destroyAllWindows()
+
 
 
 if __name__ == "__main__":
