@@ -8,6 +8,7 @@ import cv2
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import utilities
 import constants
+import json
 
 
 def get_largest_face_size(video):
@@ -166,12 +167,14 @@ def motion_vector_extraction(input_folder, output_folder, frames, box_size):
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
             frame_list = []
+            ang_obj = []
+            mag_obj = []
 
             ret, frame1 = input_movie.read()
             prvs = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
             hsv = np.zeros_like(frame1)
             hsv[..., 1] = 255
-
+            print(frame1.shape)
             while (1):
                 ret, frame2 = input_movie.read()
 
@@ -195,23 +198,31 @@ def motion_vector_extraction(input_folder, output_folder, frames, box_size):
                 # elif k == ord('s'):
                 # cv2.imwrite('opticalfb.png', frame2)
                 frame_list = frame_list + [rgb]
-                print(rgb.shape)
+                ang_obj = ang_obj + [ang]
+                mag_obj = mag_obj + [mag]
                 # cv2.imwrite('test.png', rgb)
                 prvs = next
+
+            ang_obj = np.array(ang_obj)
+            mag_obj = np.array(mag_obj)
+
+            motion_obj = {'mag': mag_obj.tolist(), 'ang': ang_obj.tolist()}
 
             # Write the resulting frames to the output video file
             if len(frame_list) == (frames-1):
                 output_movie = cv2.VideoWriter(output_folder + filename, fourcc, length, (100, 100))
+                print("Writing vectors for {}".format(filename))
+                with open(output_folder + filename + '.json', 'w') as outfile:
+                    json.dump(motion_obj, outfile)
 
-                for f in range(frames-1):
-                    print("Writing frame {} / {}".format(f + 1, length))
-                    output_movie.write(frame_list[f])
+                # for f in range(frames-1):
+                #     print("Writing frame {} / {}".format(f + 1, length))
+                #     output_movie.write(frame_list[f])
             else:
                 print('Discarding invalid video {}'.format(filename))
 
             input_movie.release()
             cv2.destroyAllWindows()
-
 
 
 if __name__ == "__main__":
