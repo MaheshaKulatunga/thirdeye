@@ -210,14 +210,16 @@ def motion_vector_extraction(input_folder, output_folder, frames, box_size):
 
             # Write the resulting frames to the output video file
             if len(frame_list) == (frames-1):
-                output_movie = cv2.VideoWriter(output_folder + filename, fourcc, length, (100, 100))
+                # output_movie = cv2.VideoWriter(output_folder + filename, fourcc, length, (100, 100))
+                # for f in range(frames-1):
+                #     print("Writing frame {} / {}".format(f + 1, length))
+                #     output_movie.write(frame_list[f])
+
                 print("Writing vectors for {}".format(filename))
                 with open(output_folder + filename + '.json', 'w') as outfile:
                     json.dump(motion_obj, outfile)
 
-                # for f in range(frames-1):
-                #     print("Writing frame {} / {}".format(f + 1, length))
-                #     output_movie.write(frame_list[f])
+
             else:
                 print('Discarding invalid video {}'.format(filename))
 
