@@ -6,32 +6,32 @@ from keras.optimizers import Adadelta
 from keras.losses import categorical_crossentropy
 from keras.utils import to_categorical
 from keras import backend as K
-
 import constants
 import cv2
 import numpy as np
 import os
-
 from tensorflow.python.client import device_lib
 
-def get_model(xtrain, ytrain,summary=False):
-    """ Return the Keras model of the network
-    """
-
+""" Model 1 Basic 3DCNN """
+def providence(xtrain, ytrain,summary=False):
+    # Input shape
     input_layer = Input((20, 100, 100, 3))
 
-    ## convolutional layers
+    ## Convolutional layers 1
     conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
     conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
 
-    ## add max pooling to obtain the most imformatic features
+    # Max pooling to obtain the most imformatic features
     pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
 
+    ## Convolutional layers 2
     conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
     conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
+
+    # Max pooling to obtain the most imformatic features
     pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
 
-    ## perform batch normalization on the convolution outputs before feeding it to MLP architecture
+    ## Normalize and flatten before feeding it to fully connected classification stage
     pooling_layer2 = BatchNormalization()(pooling_layer2)
     flatten_layer = Flatten()(pooling_layer2)
 
@@ -49,40 +49,6 @@ def get_model(xtrain, ytrain,summary=False):
     if summary:
         print(model.summary())
     model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-    model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=5, validation_split=0.2, verbose=2)
+    history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=5, validation_split=0.2, verbose=2)
 
     return model
-
-
-
-def retrive_data(folder):
-    data = []
-    for index, filename in enumerate(os.listdir(folder)):
-        cap = cv2.VideoCapture(folder + filename)
-
-        vid = []
-        while True:
-            ret, img = cap.read()
-            if not ret:
-                break
-            vid.append(img)
-        vid = np.array(vid, dtype=np.float32)
-        data.append(vid)
-    return data
-
-if __name__ == "__main__":
-    # print(device_lib.list_local_devices())
-    # print(K.tensorflow_backend._get_available_gpus())
-    df_data = retrive_data(constants.TRAIN_SEPARATED_DF_FACES)
-    df_labels = [1] * len(df_data)
-    real_data = retrive_data(constants.TRAIN_SEPARATED_REAL_FACES)
-    real_labels = [0] * len(real_data)
-    print(len(real_data))
-    print(len(df_data))
-    train_x = df_data[:500] + real_data[:500]
-    train_y = df_labels[:500] + real_labels[:500]
-    train_y = to_categorical(train_y)
-
-    real_data = []
-    df_data =[]
-    model = get_model(np.array(train_x), np.array(train_y), summary=True)
