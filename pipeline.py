@@ -30,8 +30,8 @@ if __name__ == "__main__":
     real_labels = [0] * len(real_data)
 
     # Seperate training and test data
-    train_x = df_data[:500] + real_data[:500]
-    train_y = df_labels[:500] + real_labels[:500]
+    train_x = df_data[:650] + real_data[:650]
+    train_y = df_labels[:650] + real_labels[:650]
     train_y = to_categorical(train_y)
 
     # Remove data from memory
@@ -40,4 +40,3 @@ if __name__ == "__main__":
 
     # Traing model 1
     model = thirdeye.providence(np.array(train_x), np.array(train_y), summary=True)
-    
