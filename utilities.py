@@ -13,12 +13,10 @@ def get_frame_values(file_path):
     frame_rates = []
     for index, filename in enumerate(os.listdir(file_path)):
         # If video file
-        if filename.endswith(".mp4"):
+        if filename.endswith(".mp4") or filename.endswith(".avi"):
             input_movie = init_video(file_path + filename)
             length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
             frame_rates = frame_rates + [length]
-            print(length)
-    print(min(frame_rates))
 
 
 # This is now done within the raw file processing
