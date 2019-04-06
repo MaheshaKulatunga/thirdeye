@@ -26,3 +26,5 @@ TRAIN_MV_REAL_FACES = './Data/Train/REAL/MV/'
 
 TEST_MV_DF_FACES = './Data/Test/DF/MV/'
 TEST_MV_REAL_FACES = './Data/Test/REAL/MV/'
+
+SAVED_MODELS = './Saved_Models/'

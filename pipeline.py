@@ -40,3 +40,4 @@ if __name__ == "__main__":
 
     # Traing model 1
     model = thirdeye.providence(np.array(train_x), np.array(train_y), summary=True)
+    
