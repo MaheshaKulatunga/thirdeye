@@ -22,6 +22,7 @@ def retrive_data(folder):
     return data
 
 if __name__ == "__main__":
+    """" USING RAW VIDEOS FIRST""""
     df_data = retrive_data(constants.TRAIN_SEPARATED_DF_FACES)
     df_labels = [1] * len(df_data)
     print('Found {} Deepfakes'.format(len(df_data)))
@@ -38,5 +39,5 @@ if __name__ == "__main__":
     real_data = []
     df_data =[]
 
-    # Traing model 1
+    # Traing model 1 - Providence
     model = thirdeye.providence(np.array(train_x), np.array(train_y), summary=True)
