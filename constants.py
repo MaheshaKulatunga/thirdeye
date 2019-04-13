@@ -2,6 +2,7 @@
 # File Paths
 RAW_DEEPFAKES = './Data/Raw/DF/'
 RAW_REAL = './Data/Raw/REAL/'
+RAW_TEST = './Data/Raw/TEST/'
 
 TRAIN_DEEPFAKES = './Data/Train/DF/'
 TRAIN_REAL = './Data/Train/REAL/'

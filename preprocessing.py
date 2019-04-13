@@ -51,6 +51,7 @@ def split_raw_videos(clip_size, file_path, fps_path, output_path):
             if filename.endswith(".mp4"):
                 video_filetype = "mp4"
             if filename.endswith(".avi"):
+                # video_filetype = "avi"
                 video_filetype = "avi"
 
 
@@ -59,16 +60,19 @@ def split_raw_videos(clip_size, file_path, fps_path, output_path):
 
             input_video_path = fps_path + filename
             # Import video
-            with VideoFileClip(input_video_path) as video:
-                # Get video duration and calculate number of possible clips
-                clip_count = int(video.duration/clip_size)
-                # Split each clip and save
-                for clip in range(clip_count):
-                    output_video_path = '{}{}{}.{}'.format(output_path, index, clip, video_filetype)
-                    start = clip
-                    end = clip + clip_size
-                    new = video.subclip(start, end)
-                    new.write_videofile(output_video_path, audio=False, codec='libx264')
+            if os.path.isfile(input_video_path):
+                with VideoFileClip(input_video_path) as video:
+                    # Get video duration and calculate number of possible clips
+                    clip_count = int(video.duration/clip_size)
+                    # Split each clip and save
+                    for clip in range(clip_count):
+                        output_video_path = '{}{}{}.{}'.format(output_path, index, clip, video_filetype) #TODO CONVERT HERE
+                        start = clip
+                        end = clip + clip_size
+                        new = video.subclip(start, end)
+                        new.write_videofile(output_video_path, audio=False, codec='libx264')
+            else:
+                print('Warning missing file {}'.format(filename))
         else:
             print('Warning: Incompatible file')
     print('File split Complete')
@@ -95,7 +99,7 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size, fram
     if file_name.endswith(".mp4"):
         fcc = "mp4v"
     if file_name.endswith(".avi"):
-        fcc = "avc1"
+        fcc = "mp4v"
 
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
@@ -178,7 +182,7 @@ def motion_vector_extraction(input_folder, output_folder, frames, box_size):
             if filename.endswith(".mp4"):
                 fcc = "mp4v"
             if filename.endswith(".avi"):
-                fcc = "avc1"
+                fcc = "mp4v"
 
             fourcc = cv2.VideoWriter_fourcc(*fcc)
 
@@ -280,43 +284,82 @@ def handle_files():
         print('Motion vectors detected')
         motion_vector_extraction(constants.TRAIN_SEPARATED_REAL_FACES, constants.TRAIN_MV_REAL_FACES, 20, 50)
 
-if __name__ == "__main__":
-    if len(os.listdir(constants.TRAIN_DEEPFAKES)) <= 1:
+def handle_test_files():
+    if len(os.listdir(constants.TEST_DEEPFAKES)) <= 3:
         print("Looking for raw videos")
-        if len(os.listdir(constants.RAW_DEEPFAKES)) == 0:
+        if len(os.listdir(constants.RAW_TEST)) == 0:
             print('No Raw Videos Found!')
         else:
             start_time = time.time()
-            split_raw_videos(1, constants.RAW_DEEPFAKES, constants.TRAIN_FPS_DEEPFAKES , constants.TRAIN_DEEPFAKES)
+            split_raw_videos(1, constants.RAW_TEST, constants.TEST_FPS_DEEPFAKES , constants.TEST_DEEPFAKES)
             print("--- %s seconds ---" % (time.time() - start_time))
-
     else:
         print('Training Videos Detected')
 
-    if len(os.listdir(constants.TRAIN_SEPARATED_DF_FACES)) == 0:
+    if len(os.listdir(constants.TEST_SEPARATED_DF_FACES)) == 0:
         print('Looking for videos to crop')
-        if len(os.listdir(constants.TRAIN_DEEPFAKES)) == 1:
+        if len(os.listdir(constants.TEST_DEEPFAKES)) == 1:
             print('Can\'nt find videos to crop!')
         else:
-            utilities.get_frame_values(constants.TRAIN_DEEPFAKES)
-            utilities.get_frame_values(constants.TRAIN_FPS_DEEPFAKES)
+            utilities.get_frame_values(constants.TEST_DEEPFAKES)
+            utilities.get_frame_values(constants.TEST_FPS_DEEPFAKES)
 
             start_time = time.time()
-            crop_videos(constants.TRAIN_DEEPFAKES, constants.TRAIN_SEPARATED_DF_FACES, 20, 100, 20)
+            crop_videos(constants.TEST_DEEPFAKES, constants.TEST_SEPARATED_DF_FACES, 20, 100, 20)
             print("--- %s seconds ---" % (time.time() - start_time))
     else:
         print('Cropped videos detected')
 
-    if len(os.listdir(constants.TRAIN_MV_DF_FACES)) == 0:
+    if len(os.listdir(constants.TEST_MV_DF_FACES)) == 0:
         print('Looking to extract motion vectors')
-        if len(os.listdir(constants.TRAIN_SEPARATED_DF_FACES)) == 1:
+        if len(os.listdir(constants.TEST_SEPARATED_DF_FACES)) == 1:
             print('Can\'nt find videos to extract motion vectors from!')
         else:
             start_time = time.time()
-            motion_vector_extraction(constants.TRAIN_SEPARATED_DF_FACES, constants.TRAIN_MV_DF_FACES, 20, 50)
+            motion_vector_extraction(constants.TEST_SEPARATED_DF_FACES, constants.TEST_MV_DF_FACES, 20, 50)
             print("--- %s seconds ---" % (time.time() - start_time))
     else:
         print('Motion vectors detected')
-        motion_vector_extraction(constants.TRAIN_SEPARATED_DF_FACES, constants.TRAIN_MV_DF_FACES, 20, 50)
+        motion_vector_extraction(constants.TEST_SEPARATED_DF_FACES, constants.TEST_MV_DF_FACES, 20, 50)
 
+if __name__ == "__main__":
+    # if len(os.listdir(constants.TRAIN_DEEPFAKES)) <= 1:
+    #     print("Looking for raw videos")
+    #     if len(os.listdir(constants.RAW_DEEPFAKES)) == 0:
+    #         print('No Raw Videos Found!')
+    #     else:
+    #         start_time = time.time()
+    #         split_raw_videos(1, constants.RAW_DEEPFAKES, constants.TRAIN_FPS_DEEPFAKES , constants.TRAIN_DEEPFAKES)
+    #         print("--- %s seconds ---" % (time.time() - start_time))
+    #
+    # else:
+    #     print('Training Videos Detected')
+    #
+    # if len(os.listdir(constants.TRAIN_SEPARATED_DF_FACES)) == 0:
+    #     print('Looking for videos to crop')
+    #     if len(os.listdir(constants.TRAIN_DEEPFAKES)) == 1:
+    #         print('Can\'nt find videos to crop!')
+    #     else:
+    #         utilities.get_frame_values(constants.TRAIN_DEEPFAKES)
+    #         utilities.get_frame_values(constants.TRAIN_FPS_DEEPFAKES)
+    #
+    #         start_time = time.time()
+    #         crop_videos(constants.TRAIN_DEEPFAKES, constants.TRAIN_SEPARATED_DF_FACES, 20, 100, 20)
+    #         print("--- %s seconds ---" % (time.time() - start_time))
+    # else:
+    #     print('Cropped videos detected')
+    #
+    # if len(os.listdir(constants.TRAIN_MV_DF_FACES)) == 0:
+    #     print('Looking to extract motion vectors')
+    #     if len(os.listdir(constants.TRAIN_SEPARATED_DF_FACES)) == 1:
+    #         print('Can\'nt find videos to extract motion vectors from!')
+    #     else:
+    #         start_time = time.time()
+    #         motion_vector_extraction(constants.TRAIN_SEPARATED_DF_FACES, constants.TRAIN_MV_DF_FACES, 20, 50)
+    #         print("--- %s seconds ---" % (time.time() - start_time))
+    # else:
+    #     print('Motion vectors detected')
+    #     motion_vector_extraction(constants.TRAIN_SEPARATED_DF_FACES, constants.TRAIN_MV_DF_FACES, 20, 50)
+    #
     handle_files()
+    # handle_test_files()
