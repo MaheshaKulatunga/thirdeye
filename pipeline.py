@@ -1,4 +1,5 @@
 import thirdeye
+import preprocessing
 import constants
 import cv2
 import numpy as np
@@ -36,7 +37,6 @@ def single_video_test(folder, filename):
     data.append(vid)
     return data
 
-
 def predict_video():
     videos_to_predict = retrive_data(constants.TEST_SEPARATED_DF_FACES)
 
@@ -47,9 +47,13 @@ def predict_video():
 
     return predictions
 
-
 if __name__ == "__main__":
-    """" USING RAW VIDEOS FIRST"""""
+
+    """ PREPROCESSING """
+    preprocessing.handle_train_files()
+    preprocessing.handle_test_files()
+
+    """" TRAIN MODELS IF NOT ALREADY SAVED """""
     df_data = retrive_data(constants.TRAIN_SEPARATED_DF_FACES)
     df_labels = [1] * len(df_data)
     print('Found {} Deepfakes'.format(len(df_data)))
@@ -67,8 +71,12 @@ if __name__ == "__main__":
     df_data =[]
 
     # Traing model 1 - Providence
-    model = thirdeye.providence(np.array(train_x), np.array(train_y), summary=True)
+    providence_filepath = constants.SAVED_MODELS + 'providence.sav'
+    exists = os.path.isfile(providence_filepath)
+    if not exists:
+        model = thirdeye.providence(np.array(train_x), np.array(train_y), summary=True)
 
+    """ EVALUATE MODEL """
     # predictions = predict_video()
     #
     # for prediction in predictions:
