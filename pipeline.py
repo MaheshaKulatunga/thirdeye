@@ -2,6 +2,7 @@ import thirdeye
 import preprocessing
 import constants
 import utilities
+import evaluate
 import cv2
 import numpy as np
 import pandas as pd
@@ -71,13 +72,10 @@ def split_frames(data, chunk):
 
     split_fs = [item for item in split_fs if len(item) == chunk]
 
-    for item in split_fs:
-        print(len(item))
-
     return split_fs
 
 def prepare_training_data(total_data=1000, frame_clip=-1):
-    df_data = retrive_data(constants.TRAIN_SEPARATED_DF_FACES) # print(df_data[0][:10].shape)
+    df_data = retrive_data(constants.TRAIN_SEPARATED_DF_FACES)
 
     # Split further?
     if frame_clip != -1:
@@ -119,11 +117,13 @@ if __name__ == "__main__":
     # Carry out preprocessing?
     PRE_PROCESSING = False
     # Clip frames below 20?
-    FRAME_CLIP = 15
+    FRAME_CLIP = 17
     # Maximum videos per class
     MAX_FOR_CLASS = 1500
     # Force retaining of models?
     FORCE_TRAIN = True
+    # Evaluate models?
+    EVALUATE = False
 
     """ PREPROCESSING """
     if PRE_PROCESSING:
@@ -137,12 +137,17 @@ if __name__ == "__main__":
     providence_filepath = constants.SAVED_MODELS + 'providence.sav'
     exists = os.path.isfile(providence_filepath)
     if not exists or FORCE_TRAIN:
-        print('Opening The Eye Of Providence')
+        print('Opening The Eye Of Providence.')
         model = thirdeye.providence(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
     else:
         print('The Eye Of Providence is open.')
 
     """ EVALUATE MODEL """
+    if EVALUATE:
+        print('Evaluating model')
+        providence_history = pickle.load(open(constants.SAVED_MODELS + 'providence_history.sav', 'rb'))
+        evaluate.plot_accloss_graph(providence_history, 'Providence')
+
     # predictions = predict_video()
     #
     # for prediction in predictions:
