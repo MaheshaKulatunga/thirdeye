@@ -14,9 +14,12 @@ from tensorflow.python.client import device_lib
 import pickle
 
 """ Model 1 Basic 3DCNN """
-def providence(xtrain, ytrain,summary=False):
+def providence(xtrain, ytrain,summary=False, frame_clip=-1):
     # Input shape
-    input_layer = Input((20, 100, 100, 3))
+    if frame_clip != -1:
+        input_layer = Input((frame_clip, 100, 100, 3))
+    else:
+        input_layer = Input((20, 100, 100, 3))
 
     ## Convolutional layers 1
     conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)

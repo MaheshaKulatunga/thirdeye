@@ -1,16 +1,21 @@
 import thirdeye
 import preprocessing
 import constants
+import utilities
 import cv2
 import numpy as np
+import pandas as pd
 import os
 from keras.utils import to_categorical
 import pickle
+from sklearn.utils import shuffle
 
 """ Retrive data from folders"""
 def retrive_data(folder):
     data = []
-    for index, filename in enumerate(os.listdir(folder)):
+    sorted_folder = os.listdir(folder)
+    sorted_folder.sort()
+    for index, filename in enumerate(sorted_folder):
         cap = cv2.VideoCapture(folder + filename)
 
         vid = []
@@ -47,34 +52,95 @@ def predict_video():
 
     return predictions
 
-if __name__ == "__main__":
+def flip_duplicate(data):
+    flipped_videos = []
+    for video in data:
+        new_video = []
+        for frame in video:
+            new_frame = utilities.flip_img(frame)
+            new_video.append(new_frame)
+        flipped_videos.append(new_video)
 
-    """ PREPROCESSING """
-    preprocessing.handle_train_files()
-    preprocessing.handle_test_files()
+    return flipped_videos
 
-    """" TRAIN MODELS IF NOT ALREADY SAVED """""
-    df_data = retrive_data(constants.TRAIN_SEPARATED_DF_FACES)
+def split_frames(data, chunk):
+    split_fs = []
+
+    for video in data:
+        split_fs = split_fs + [video[i:i + chunk] for i in range(0, len(video), chunk)]
+
+    split_fs = [item for item in split_fs if len(item) == chunk]
+
+    for item in split_fs:
+        print(len(item))
+
+    return split_fs
+
+def prepare_training_data(total_data=1000, frame_clip=-1):
+    df_data = retrive_data(constants.TRAIN_SEPARATED_DF_FACES) # print(df_data[0][:10].shape)
+
+    # Split further?
+    if frame_clip != -1:
+        df_data = split_frames(df_data, frame_clip)
+    # Flip and duplicate
+    flipped_df = flip_duplicate(df_data)
+    df_data = df_data + flipped_df
+
     df_labels = [1] * len(df_data)
     print('Found {} Deepfakes'.format(len(df_data)))
-    real_data = retrive_data(constants.TRAIN_SEPARATED_REAL_FACES)
-    print('Found {} Pristine Videos'.format(len(real_data)))
-    real_labels = [0] * len(real_data)
 
-    # Seperate training and test data
-    train_x = df_data[:750] + real_data[:750]
-    train_y = df_labels[:750] + real_labels[:750]
-    train_y = to_categorical(train_y)
+    real_data = retrive_data(constants.TRAIN_SEPARATED_REAL_FACES)
+    # Split further?
+    if frame_clip != -1:
+        real_data = split_frames(real_data, frame_clip)
+    # Flip and duplicate
+    flipped_real = flip_duplicate(real_data)
+    real_data = real_data + flipped_real
+
+    real_labels = [0] * len(real_data)
+    print('Found {} Pristine Videos'.format(len(real_data)))
+
+    train_x = df_data[:total_data] + real_data[:total_data]
+    train_y = df_labels[:total_data] + real_labels[:total_data]
+    data = {'Videos': train_x, 'Labels':train_y}
+
+    # Create DataFrame to shuffle
+    data_frame = pd.DataFrame(data)
+    data_frame = shuffle(data_frame, random_state=42)
 
     # Remove data from memory
     real_data = []
     df_data =[]
 
+    return np.array(list(data_frame['Videos'].values)), np.array(to_categorical(list(data_frame['Labels'])))
+
+if __name__ == "__main__":
+    """ THIRDEYE PARAMETERS """
+    # Carry out preprocessing?
+    PRE_PROCESSING = False
+    # Clip frames below 20?
+    FRAME_CLIP = 15
+    # Maximum videos per class
+    MAX_FOR_CLASS = 1500
+    # Force retaining of models?
+    FORCE_TRAIN = True
+
+    """ PREPROCESSING """
+    if PRE_PROCESSING:
+        preprocessing.handle_train_files()
+        preprocessing.handle_test_files()
+
+    """" TRAIN MODELS IF NOT ALREADY SAVED """""
+    train_x, train_y = prepare_training_data(MAX_FOR_CLASS, FRAME_CLIP)
+
     # Traing model 1 - Providence
     providence_filepath = constants.SAVED_MODELS + 'providence.sav'
     exists = os.path.isfile(providence_filepath)
-    if not exists:
-        model = thirdeye.providence(np.array(train_x), np.array(train_y), summary=True)
+    if not exists or FORCE_TRAIN:
+        print('Opening The Eye Of Providence')
+        model = thirdeye.providence(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
+    else:
+        print('The Eye Of Providence is open.')
 
     """ EVALUATE MODEL """
     # predictions = predict_video()

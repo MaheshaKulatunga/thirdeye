@@ -18,6 +18,12 @@ def get_frame_values(file_path):
             length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
             frame_rates = frame_rates + [length]
 
+def flip_img(img):
+    horizontal_img = img.copy()
+    # flip img horizontally
+    horizontal_img = cv2.flip( img, 0 )
+
+    return horizontal_img
 
 # This is now done within the raw file processing
 # def standardise_fps(file_path):
