@@ -13,7 +13,7 @@ from sklearn.utils import shuffle
 import json
 
 """ Retrive data from folders"""
-def retrive_data(folder, rgb=True):
+def retrive_data(folder, rgb=True, mv_type='mag'):
     data = []
     sorted_folder = os.listdir(folder)
     sorted_folder.sort()
@@ -35,7 +35,7 @@ def retrive_data(folder, rgb=True):
         for index, filename in enumerate(sorted_folder):
             with open(folder + filename, 'r') as f:
                 mv = json.load(f)
-            mv_arr = np.array(mv['ang'], dtype=np.float32)
+            mv_arr = np.array(mv[mv_type], dtype=np.float32)
             data.append(mv_arr)
 
     return data
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     # Maximum videos per class
     MAX_FOR_CLASS = 1500
     # Force retaining of models?
-    FORCE_TRAIN = False
+    FORCE_TRAIN = True
     # Evaluate models?
     EVALUATE = True
     # Activate models
