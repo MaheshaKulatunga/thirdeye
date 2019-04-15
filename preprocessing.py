@@ -256,13 +256,13 @@ def handle_train_files():
         crop_videos(constants.TRAIN_DEEPFAKES, constants.TRAIN_SEPARATED_DF_FACES, 20, 100, 20)
         print("--- %s seconds ---" % (time.time() - start_time))
 
-    # print('Looking to extract motion vectors')
-    # if len(os.listdir(constants.TRAIN_SEPARATED_DF_FACES)) == 0:
-    #     print('Can\'t find videos to extract motion vectors from!')
-    # else:
-    #     start_time = time.time()
-    #     motion_vector_extraction(constants.TRAIN_SEPARATED_DF_FACES, constants.TRAIN_MV_DF_FACES, 20, 50)
-    #     print("--- %s seconds ---" % (time.time() - start_time))
+    print('Looking to extract motion vectors')
+    if len(os.listdir(constants.TRAIN_SEPARATED_DF_FACES)) == 0:
+        print('Can\'t find videos to extract motion vectors from!')
+    else:
+        start_time = time.time()
+        motion_vector_extraction(constants.TRAIN_SEPARATED_DF_FACES, constants.TRAIN_MV_DF_FACES, 20, 50)
+        print("--- %s seconds ---" % (time.time() - start_time))
 
     print("Looking for raw videos")
     if len(os.listdir(constants.RAW_REAL)) == 1:
@@ -283,13 +283,13 @@ def handle_train_files():
         crop_videos(constants.TRAIN_REAL, constants.TRAIN_SEPARATED_REAL_FACES, 20, 100, 20)
         print("--- %s seconds ---" % (time.time() - start_time))
 
-    # print('Looking to extract motion vectors')
-    # if len(os.listdir(constants.TRAIN_SEPARATED_REAL_FACES)) == 0:
-    #     print('Can\'t find videos to extract motion vectors from!')
-    # else:
-    #     start_time = time.time()
-    #     motion_vector_extraction(constants.TRAIN_SEPARATED_REAL_FACES, constants.TRAIN_MV_REAL_FACES, 20, 50)
-    #     print("--- %s seconds ---" % (time.time() - start_time))
+    print('Looking to extract motion vectors')
+    if len(os.listdir(constants.TRAIN_SEPARATED_REAL_FACES)) == 0:
+        print('Can\'t find videos to extract motion vectors from!')
+    else:
+        start_time = time.time()
+        motion_vector_extraction(constants.TRAIN_SEPARATED_REAL_FACES, constants.TRAIN_MV_REAL_FACES, 20, 50)
+        print("--- %s seconds ---" % (time.time() - start_time))
 
 
 """ Preprocesses testing files """
@@ -314,10 +314,10 @@ def handle_test_files():
         crop_videos(constants.TEST_DEEPFAKES, constants.TEST_SEPARATED_DF_FACES, 20, 100, 20)
         print("--- %s seconds ---" % (time.time() - start_time))
 
-    # print('Looking to extract motion vectors')
-    # if len(os.listdir(constants.TEST_SEPARATED_DF_FACES)) == 0:
-    #     print('Can\'t find videos to extract motion vectors from!')
-    # else:
-    #     start_time = time.time()
-    #     motion_vector_extraction(constants.TEST_SEPARATED_DF_FACES, constants.TEST_MV_DF_FACES, 20, 50)
-    #     print("--- %s seconds ---" % (time.time() - start_time))
+    print('Looking to extract motion vectors')
+    if len(os.listdir(constants.TEST_SEPARATED_DF_FACES)) == 0:
+        print('Can\'t find videos to extract motion vectors from!')
+    else:
+        start_time = time.time()
+        motion_vector_extraction(constants.TEST_SEPARATED_DF_FACES, constants.TEST_MV_DF_FACES, 20, 50)
+        print("--- %s seconds ---" % (time.time() - start_time))
