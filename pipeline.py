@@ -117,7 +117,7 @@ if __name__ == "__main__":
     # Carry out preprocessing?
     PRE_PROCESSING = False
     # Clip frames below 20?
-    FRAME_CLIP = 17
+    FRAME_CLIP = 8
     # Maximum videos per class
     MAX_FOR_CLASS = 1500
     # Force retaining of models?

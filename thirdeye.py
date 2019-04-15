@@ -26,14 +26,30 @@ def providence(xtrain, ytrain,summary=False, frame_clip=-1):
     conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
 
     # Max pooling to obtain the most imformatic features
-    pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
+    if frame_clip > 5:
+        pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
+    else:
+        pooling_layer1 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer2)
 
     ## Convolutional layers 2
-    conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
-    conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
+    if frame_clip > 8:
+        conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
+    else:
+        conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
+    # When using less frames, we need to reduce kernal size to fit after previous convolutions
+    if frame_clip > 11:
+        conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
+    else:
+        conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
+
 
     # Max pooling to obtain the most imformatic features
-    pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
+    # When using less frames, we need to reduce kernal size to fit after previous convolutions
+    if frame_clip > 14:
+        pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
+    else:
+        pooling_layer2 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer4)
+
 
     # Normalize and flatten before feeding it to fully connected classification stage
     pooling_layer2 = BatchNormalization()(pooling_layer2)
