@@ -166,7 +166,7 @@ if __name__ == "__main__":
     # Force retaining of models?
     FORCE_TRAIN = False
     # Evaluate models?
-    EVALUATE = False
+    EVALUATE = True
     # Activate models
     PROVIDENCE = False
     SIXTHSENSE = True
@@ -189,7 +189,7 @@ if __name__ == "__main__":
         else:
             print('Providence is ready.')
 
-    if SIXTHSENSE:
+    if SIXTHSENSE and not EVALUATE:
         train_x, train_y = prepare_training_mv_data(MAX_FOR_CLASS, FRAME_CLIP, rgb=False)
 
         # Traing model 2 - Sixthsense
@@ -202,11 +202,15 @@ if __name__ == "__main__":
             print('Sixthsense is ready.')
 
     """ EVALUATE MODEL """
-    if EVALUATE:
+    if EVALUATE and PROVIDENCE:
         print('Evaluating model')
         providence_history = pickle.load(open(constants.SAVED_MODELS + 'providence_history.sav', 'rb'))
         evaluate.plot_accloss_graph(providence_history, 'Providence')
 
+    if EVALUATE and SIXTHSENSE:
+        print('Evaluating model')
+        sixthsense_history = pickle.load(open(constants.SAVED_MODELS + 'sixthsense_history.sav', 'rb'))
+        evaluate.plot_accloss_graph(sixthsense_history, 'Sixthsense')
     # predictions = predict_video()
     #
     # for prediction in predictions:
