@@ -127,16 +127,16 @@ def prepare_training_mv_data(total_data=1000, frame_clip=-1, rgb=True):
     df_data = retrive_data(constants.TRAIN_MV_DF_FACES, rgb=rgb)
 
     # # Split further?
-    # if frame_clip != -1:
-    #     df_data = split_frames(df_data, frame_clip)
+    if frame_clip != -1:
+        df_data = split_frames(df_data, frame_clip)
 
     df_labels = [1] * len(df_data)
     print('Found {} Deepfake MVs'.format(len(df_data)))
 
     real_data = retrive_data(constants.TRAIN_MV_REAL_FACES, rgb=rgb)
-    # # Split further?
-    # if frame_clip != -1:
-    #     real_data = split_frames(real_data, frame_clip)
+    # Split further?
+    if frame_clip != -1:
+        real_data = split_frames(real_data, frame_clip)
 
     real_labels = [0] * len(real_data)
     print('Found {} Pristine MVs'.format(len(real_data)))
@@ -160,13 +160,13 @@ if __name__ == "__main__":
     # Carry out preprocessing?
     PRE_PROCESSING = False
     # Clip frames below 20?
-    FRAME_CLIP = 19
+    FRAME_CLIP = 5
     # Maximum videos per class
     MAX_FOR_CLASS = 1500
     # Force retaining of models?
     FORCE_TRAIN = True
     # Evaluate models?
-    EVALUATE = True
+    EVALUATE = False
     # Activate models
     PROVIDENCE = False
     SIXTHSENSE = True
