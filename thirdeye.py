@@ -23,7 +23,10 @@ def providence(xtrain, ytrain,summary=False, frame_clip=-1):
 
     ## Convolutional layers 1
     conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-    conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
+    if frame_clip > 5:
+        conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
+    else:
+        conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
 
     # Max pooling to obtain the most imformatic features
     if frame_clip > 5:

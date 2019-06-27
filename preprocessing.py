@@ -154,7 +154,16 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size, fram
             print("Writing frame {} / {}".format(f+1, length))
             output_movie.write(frame_list[f])
     else:
-        print('Discarding invalid video {}'.format(file_name))
+        if len(frame_list) >= (frames * 0.75):
+            output_movie = cv2.VideoWriter(output_folder + file_name, fourcc, length, (box_size, box_size))
+
+            print('Duplicating frames for video {}'.format(file_name))
+            frame_list = frame_list + [frame_list[0]] * (frames - len(frame_list))
+            for f in range(frames):
+                print("Writing frame {} / {}".format(f+1, length))
+                output_movie.write(frame_list[f])
+        else:
+            print('Discarding invalid video {}'.format(file_name))
 
     # All done!
     input_movie.release()
@@ -239,7 +248,7 @@ def handle_train_files():
     print('Proprocessing training files')
     print("Looking for raw videos")
     if len(os.listdir(constants.RAW_DEEPFAKES)) == 1:
-        print('No Raw Videos Found!')
+        print('No New Raw Videos Found!')
     else:
         start_time = time.time()
         split_raw_videos(1, constants.RAW_DEEPFAKES, constants.TRAIN_FPS_DEEPFAKES , constants.TRAIN_DEEPFAKES)
