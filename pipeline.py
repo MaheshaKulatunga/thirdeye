@@ -85,26 +85,37 @@ def split_frames(data, chunk):
 
     return split_fs
 
-def prepare_training_img_data(total_data=1000, frame_clip=-1):
-    df_data = retrive_data(constants.TRAIN_SEPARATED_DF_FACES)
+def prepare_training_img_data(total_data=1000, frame_clip=-1, test=False):
+    if test:
+        df_data = retrive_data(constants.TEST_SEPARATED_DF_FACES)
+    else:
+        df_data = retrive_data(constants.TRAIN_SEPARATED_DF_FACES)
 
     # Split further?
     if frame_clip != -1:
         df_data = split_frames(df_data, frame_clip)
-    # Flip and duplicate
-    flipped_df = flip_duplicate(df_data)
-    df_data = df_data + flipped_df
+
+    if not test:
+        # Flip and duplicate
+        flipped_df = flip_duplicate(df_data)
+        df_data = df_data + flipped_df
 
     df_labels = [1] * len(df_data)
     print('Found {} Deepfakes'.format(len(df_data)))
 
-    real_data = retrive_data(constants.TRAIN_SEPARATED_REAL_FACES)
+    if test:
+        real_data = retrive_data(constants.TEST_SEPARATED_REAL_FACES)
+    else:
+        real_data = retrive_data(constants.TRAIN_SEPARATED_REAL_FACES)
+
+
     # Split further?
     if frame_clip != -1:
         real_data = split_frames(real_data, frame_clip)
-    # Flip and duplicate
-    flipped_real = flip_duplicate(real_data)
-    real_data = real_data + flipped_real
+    if not test:
+        # Flip and duplicate
+        flipped_real = flip_duplicate(real_data)
+        real_data = real_data + flipped_real
 
     real_labels = [0] * len(real_data)
     print('Found {} Pristine Videos'.format(len(real_data)))
@@ -158,17 +169,17 @@ def prepare_training_mv_data(total_data=1000, frame_clip=-1, rgb=True):
 if __name__ == "__main__":
     """ THIRDEYE PARAMETERS """
     # Carry out preprocessing?
-    PRE_PROCESSING = True
+    PRE_PROCESSING = False
     # Clip frames below 20?
-    FRAME_CLIP = 5
+    FRAME_CLIP = 20
     # Maximum videos per class
-    MAX_FOR_CLASS = 1500
+    MAX_FOR_CLASS = 1200
     # Force retaining of models?
-    FORCE_TRAIN = False
+    FORCE_TRAIN = True
     # Evaluate models?
-    EVALUATE = False
+    EVALUATE = True
     # Activate models
-    PROVIDENCE = False
+    PROVIDENCE = True
     SIXTHSENSE = False
 
     """ PREPROCESSING """
@@ -178,25 +189,25 @@ if __name__ == "__main__":
 
     """" TRAIN MODELS IF NOT ALREADY SAVED """""
     if PROVIDENCE:
-        train_x, train_y = prepare_training_img_data(MAX_FOR_CLASS, FRAME_CLIP)
 
         # Traing model 1 - Providence
         providence_filepath = constants.SAVED_MODELS + 'providence.sav'
         exists = os.path.isfile(providence_filepath)
         if not exists or FORCE_TRAIN:
             print('Training Providence.')
+            train_x, train_y = prepare_training_img_data(MAX_FOR_CLASS, FRAME_CLIP)
             model = thirdeye.providence(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
         else:
             print('Providence is ready.')
 
     if SIXTHSENSE and not EVALUATE:
-        train_x, train_y = prepare_training_mv_data(MAX_FOR_CLASS, FRAME_CLIP, rgb=False)
 
         # Traing model 2 - Sixthsense
         providence_filepath = constants.SAVED_MODELS + 'sixthsense.sav'
         exists = os.path.isfile(providence_filepath)
         if not exists or FORCE_TRAIN:
             print('Training Sixthsense')
+            train_x, train_y = prepare_training_mv_data(MAX_FOR_CLASS, FRAME_CLIP, rgb=False)
             model = thirdeye.sixthsense(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
         else:
             print('Sixthsense is ready.')
@@ -204,8 +215,18 @@ if __name__ == "__main__":
     """ EVALUATE MODEL """
     if EVALUATE and PROVIDENCE:
         print('Evaluating model')
-        providence_history = pickle.load(open(constants.SAVED_MODELS + 'providence_history.sav', 'rb'))
-        evaluate.plot_accloss_graph(providence_history, 'Providence')
+
+        providence_filepath = constants.SAVED_MODELS + 'providence.sav'
+        exists = os.path.isfile(providence_filepath)
+        if exists:
+            eval_x, eval_y = prepare_training_img_data(MAX_FOR_CLASS, FRAME_CLIP, test=True)
+            providence_model = pickle.load(open(constants.SAVED_MODELS + 'providence.sav', 'rb'))
+            evaluate.predict_test_data(providence_model, eval_x, eval_y, 'Providence')
+        else:
+            print('No model saved to evaluate; please train a model first')
+
+        # providence_history = pickle.load(open(constants.SAVED_MODELS + 'providence_history.sav', 'rb'))
+        # evaluate.plot_accloss_graph(providence_history, 'Providence')
 
     if EVALUATE and SIXTHSENSE:
         print('Evaluating model')
