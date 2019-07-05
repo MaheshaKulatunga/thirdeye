@@ -43,37 +43,83 @@ def group_by_video(filenames):
 
     return grouped_files
 
-def pic_2_vid(files):
+def split_frames(data, chunk):
+    split_fs = []
 
-    files = files['170']
-    frame_array = []
+    for video in data:
+        split_fs = split_fs + [video[i:i + chunk] for i in range(0, len(video), chunk)]
 
-    pathIn = '/run/media/u1856817/KINGSTON/MesoNetData/df/'
+    split_fs = [item for item in split_fs if len(item) == chunk]
 
-    for i in range(len(files)):
-        filename=pathIn + files[i]
-        #reading each files
-        img = cv2.imread(filename)
-        img = cv2.resize(img,(250,250))
-        height, width, layers = img.shape
-        size = (width,height)
+    return split_fs
 
-        #inserting the frames into an image array
-        frame_array.append(img)
+def pic_2_vid(files, pathIn, pathOut):
 
-    video = cv2.VideoWriter('1.mp4', 4, 20, size)
+    videos = split_frames(files.values(), 20)
 
-    # Appending the images to the video one by one
-    for image in frame_array:
-        video.write(image)
+    for index, file in enumerate(videos):
+        frame_array = []
+        for i in range(len(file)):
+            filename=pathIn + file[i]
+            #reading each files
+            img = cv2.imread(filename)
+            img = cv2.resize(img,(100,100))
+            height, width, layers = img.shape
+            size = (width,height)
 
-    # Deallocating memories taken for window creation
-    cv2.destroyAllWindows()
-    video.release()  # releasing the video generated
+            #inserting the frames into an image array
+            frame_array.append(img)
 
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        output_path = pathOut.format(index)
+        print(output_path)
+        video = cv2.VideoWriter(output_path, fourcc, 20, size)
+
+        # Appending the images to the video one by one
+        for image in frame_array:
+            video.write(image)
+
+        # Deallocating memories taken for window creation
+        cv2.destroyAllWindows()
+        video.release()  # releasing the video generated
+
+def vid_2_pic(files, pathIn, pathOut):
+
+    for index, video in enumerate(files):
+        filename=pathIn + video
+        vidcap = cv2.VideoCapture(filename)
+        success,image = vidcap.read()
+        count = 0
+        while success:
+            output_path = pathOut.format(index, count)
+            image = cv2.resize(image, (256,256))
+            cv2.imwrite(output_path, image)     # save frame as JPEG file
+            success,image = vidcap.read()
+            count += 1
 
 if __name__ == "__main__":
-    files = get_filenames('/run/media/u1856817/KINGSTON/MesoNetData/df/')
-    grouped = group_by_video(files)
-    # For each group, read in the files as frames and split out video
-    pic_2_vid(grouped)
+    # # PIC 2 VID
+    # files = get_filenames('/run/media/u1856817/KINGSTON/MesoNetData/df/')
+    # grouped = group_by_video(files)
+    # # For each group, read in the files as frames and split out video
+    # pic_2_vid(grouped, '/run/media/u1856817/KINGSTON/MesoNetData/df/', '/run/media/u1856817/KINGSTON/MesoNetData/df_vids/{}.mp4')
+    #
+    # files = get_filenames('/run/media/u1856817/KINGSTON/MesoNetData/real/')
+    # grouped = group_by_video(files)
+    # pic_2_vid(grouped, '/run/media/u1856817/KINGSTON/MesoNetData/real/', '/run/media/u1856817/KINGSTON/MesoNetData/real_vids/{}.mp4')
+    #
+    # files = get_filenames('/run/media/u1856817/KINGSTON/MesoNetData/TRAIN/df/')
+    # grouped = group_by_video(files)
+    # # For each group, read in the files as frames and split out video
+    # pic_2_vid(grouped, '/run/media/u1856817/KINGSTON/MesoNetData/TRAIN/df/', '/run/media/u1856817/KINGSTON/MesoNetData/TRAIN/df_vids/{}.mp4')
+    #
+    # files = get_filenames('/run/media/u1856817/KINGSTON/MesoNetData/TRAIN/real/')
+    # grouped = group_by_video(files)
+    # pic_2_vid(grouped, '/run/media/u1856817/KINGSTON/MesoNetData/TRAIN/real/', '/run/media/u1856817/KINGSTON/MesoNetData/TRAIN/real_vids/{}.mp4')
+
+    #VID 2 PIC
+    files = get_filenames('/run/media/u1856817/KINGSTON/DF_SEP/')
+    vid_2_pic(files, '/run/media/u1856817/KINGSTON/DF_SEP/', '/run/media/u1856817/KINGSTON/DF_SEP_IMGS/{}_{}.jpg')
+
+    files = get_filenames('/run/media/u1856817/KINGSTON/REAL_SEP/')
+    vid_2_pic(files, '/run/media/u1856817/KINGSTON/REAL_SEP/', '/run/media/u1856817/KINGSTON/REAL_SEP_IMGS/{}_{}.jpg')
