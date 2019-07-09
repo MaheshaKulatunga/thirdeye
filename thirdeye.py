@@ -217,9 +217,9 @@ def horus(xtrain, ytrain,summary=False, frame_clip=-1):
     flatten_layer = Flatten()(pooling_layer2)
 
     # Add dropouts to avoid overfitting / perform regularization
-    dense_layer1 = Dense(units=512, activation='relu')(flatten_layer)
+    dense_layer1 = Dense(units=256, activation='relu')(flatten_layer)
     dense_layer1 = Dropout(0.4)(dense_layer1)
-    dense_layer2 = Dense(units=256, activation='relu')(dense_layer1)
+    dense_layer2 = Dense(units=128, activation='relu')(dense_layer1)
     dense_layer2 = Dropout(0.4)(dense_layer2)
     output_layer = Dense(2, activation='softmax')(dense_layer2)
 
