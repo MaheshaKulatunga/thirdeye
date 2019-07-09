@@ -1,4 +1,5 @@
 import thirdeye
+import classify
 import preprocessing
 import constants
 import utilities
@@ -53,16 +54,6 @@ def single_video_test(folder, filename):
     vid = np.array(vid, dtype=np.float32)
     data.append(vid)
     return data
-
-def predict_video():
-    videos_to_predict = retrive_data(constants.TEST_SEPARATED_DF_FACES)
-
-    # single_video = single_video_test(constants.TEST_SEPARATED_DF_FACES, '152.mp4')
-
-    providence = pickle.load(open(constants.SAVED_MODELS + 'providence.sav', 'rb'))
-    predictions = providence.predict(np.array(videos_to_predict))
-
-    return predictions
 
 def flip_duplicate(data):
     flipped_videos = []
@@ -167,20 +158,22 @@ def prepare_training_mv_data(total_data=1000, frame_clip=-1, rgb=True):
     return np.array(list(data_frame['MVs'].values)), np.array(to_categorical(list(data_frame['Labels'])))
 
 if __name__ == "__main__":
+
     """ THIRDEYE PARAMETERS """
     # Carry out preprocessing?
     PRE_PROCESSING = False
     # Clip frames below 20?
-    FRAME_CLIP = 20
+    FRAME_CLIP = 3
     # Maximum videos per class
-    MAX_FOR_CLASS = 1200
+    MAX_FOR_CLASS = 100000
     # Force retaining of models?
     FORCE_TRAIN = True
     # Evaluate models?
-    EVALUATE = True
+    EVALUATE = False
     # Activate models
     PROVIDENCE = True
-    SIXTHSENSE = False
+    SIXTHSENSE = True
+    HORUS = True
 
     """ PREPROCESSING """
     if PRE_PROCESSING:
@@ -207,10 +200,22 @@ if __name__ == "__main__":
         exists = os.path.isfile(providence_filepath)
         if not exists or FORCE_TRAIN:
             print('Training Sixthsense')
-            train_x, train_y = prepare_training_mv_data(MAX_FOR_CLASS, FRAME_CLIP, rgb=False)
+            train_x, train_y = prepare_training_img_data(MAX_FOR_CLASS, FRAME_CLIP)
             model = thirdeye.sixthsense(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
         else:
             print('Sixthsense is ready.')
+
+    if HORUS and not EVALUATE:
+
+        # Traing model 2 - Sixthsense
+        providence_filepath = constants.SAVED_MODELS + 'horus.sav'
+        exists = os.path.isfile(providence_filepath)
+        if not exists or FORCE_TRAIN:
+            print('Training Horus')
+            train_x, train_y = prepare_training_img_data(MAX_FOR_CLASS, FRAME_CLIP)
+            model = thirdeye.sixthsense(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
+        else:
+            print('Horus is ready.')
 
     """ EVALUATE MODEL """
     if EVALUATE and PROVIDENCE:
@@ -232,7 +237,3 @@ if __name__ == "__main__":
         print('Evaluating model')
         sixthsense_history = pickle.load(open(constants.SAVED_MODELS + 'sixthsense_history.sav', 'rb'))
         evaluate.plot_accloss_graph(sixthsense_history, 'Sixthsense')
-    # predictions = predict_video()
-    #
-    # for prediction in predictions:
-    #     print(round(max(prediction)))
