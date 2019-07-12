@@ -1,4 +1,4 @@
-import thirdeye
+import networks
 import classify
 import preprocessing
 import constants
@@ -189,7 +189,7 @@ if __name__ == "__main__":
         if not exists or FORCE_TRAIN:
             print('Training Providence.')
             train_x, train_y = prepare_training_img_data(MAX_FOR_CLASS, FRAME_CLIP)
-            model = thirdeye.providence(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
+            model = networks.providence(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
         else:
             print('Providence is ready.')
 
@@ -201,7 +201,7 @@ if __name__ == "__main__":
         if not exists or FORCE_TRAIN:
             print('Training Sixthsense')
             train_x, train_y = prepare_training_img_data(MAX_FOR_CLASS, FRAME_CLIP)
-            model = thirdeye.sixthsense(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
+            model = networks.sixthsense(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
         else:
             print('Sixthsense is ready.')
 
@@ -213,7 +213,7 @@ if __name__ == "__main__":
         if not exists or FORCE_TRAIN:
             print('Training Horus')
             train_x, train_y = prepare_training_img_data(MAX_FOR_CLASS, FRAME_CLIP)
-            model = thirdeye.sixthsense(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
+            model = networks.sixthsense(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
         else:
             print('Horus is ready.')
 

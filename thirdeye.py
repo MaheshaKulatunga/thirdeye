@@ -1,472 +1,275 @@
-from keras.models import Model
-from keras.models import Sequential
-from keras.layers import Input, Dense, Flatten, Conv3D, MaxPooling3D, BatchNormalization, Dropout, Reshape, Concatenate, LeakyReLU, ZeroPadding3D
-from keras.optimizers import Adam
-from keras.optimizers import Adadelta
-from keras.losses import categorical_crossentropy
-from keras.utils import to_categorical
-from keras import backend as K
+import networks
+import classify
+import preprocessing
 import constants
+import utilities
+import evaluate
 import cv2
 import numpy as np
+import pandas as pd
 import os
-from tensorflow.python.client import device_lib
+from keras.utils import to_categorical
 import pickle
+from sklearn.utils import shuffle
+import json
 
-class Model:
-    def __init__(self):
+class Thirdeye:
+    """ Initialize Class """
+    def __init__(self, pre_p=False, force_t=False, p=False, s=False, h=False, evaluate=False, max_f_class=100000, frame_c=3):
+        self.PRE_PROCESSING = pre_p
+        self.PROVIDENCE = p
+        self.SIXTHSENSE = s
+        self.HORUS = h
+        self.FORCE_TRAIN = force_t
+        self.EVALUATE = evaluate
+        self.model = None
+        self.MAX_FOR_CLASS = max_f_class
+        self.FRAME_CLIP = frame_c
+
+        if self.PRE_PROCESSING:
+            self.preprocess()
+
+        """" TRAIN MODELS IF NOT ALREADY SAVED """""
+        if self.PROVIDENCE:
+            # Traing model 1 - Providence
+            providence_filepath = constants.SAVED_MODELS + 'providence.sav'
+            exists = os.path.isfile(providence_filepath)
+            if not exists or self.FORCE_TRAIN:
+                print('Training Providence.')
+                train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+                providence = networks.Network(summary=True)
+                providence.providence(train_x, train_y, frame_clip=self.FRAME_CLIP)
+            # else:
+            #     self.load()
+
+        if self.SIXTHSENSE:
+            # Traing model 2 - Sixthsense
+            sixthsense_filepath = constants.SAVED_MODELS + 'sixthsense.sav'
+            exists = os.path.isfile(sixthsense_filepath)
+            if not exists or self.FORCE_TRAIN:
+                print('Training Sixthsense')
+                train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+                sixthsense = networks.Network(summary=True)
+                sixthsense.sixthsense(train_x, train_y, frame_clip=self.FRAME_CLIP)
+            # else:
+            #     self.load()
+
+        if self.HORUS:
+            # Traing model 2 - Sixthsense
+            horus_filepath = constants.SAVED_MODELS + 'horus.sav'
+            exists = os.path.isfile(horus_filepath)
+            if not exists or self.FORCE_TRAIN:
+                print('Training Horus')
+                train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+                horus = networks.Network(summary=True)
+                horus.horus(train_x, train_y, frame_clip=self.FRAME_CLIP)
+            # else:
+        self.load()
+
+    """ Preprocess data """
+    def preprocess(self):
+        preprocessing.handle_train_files()
+        preprocessing.handle_test_files()
+
+    """ Train data """
+    def train(self):
+        if not self.PROVIDENCE and self.SIXTHSENSE and self.HORUS:
+            print('No active model to train!')
+
+        if self.PROVIDENCE:
+            print('Training Providence.')
+            train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+            providence = networks.Network(summary=True)
+            self.model = providence.providence(train_x, train_y, frame_clip=self.FRAME_CLIP)
+
+        if self.SIXTHSENSE:
+            print('Training Sixthsense')
+            train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+            sixthsense = networks.Network(summary=True)
+            self.model = sixthsense.sixthsense(train_x, train_y, frame_clip=self.FRAME_CLIP)
+
+        if self.HORUS:
+            print('Training Horus')
+            train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+            horus = networks.Network(summary=True)
+            self.model = horus.horus(train_x, train_y, frame_clip=self.FRAME_CLIP)
+
+    """ Load saved models """
+    def load(self):
+        if not self.PROVIDENCE and self.SIXTHSENSE and self.HORUS:
+            print('No active model to evaluate!')
+        if self.PROVIDENCE:
+            providence_filepath = constants.SAVED_MODELS + 'providence.sav'
+            exists = os.path.isfile(providence_filepath)
+            if exists:
+                providence = networks.Network(summary=True)
+                self.model = providence.providence(train=False)
+
+        if self.SIXTHSENSE:
+            sixthsense_filepath = constants.SAVED_MODELS + 'sixthsense.sav'
+            exists = os.path.isfile(sixthsense_filepath)
+            if exists:
+                sixthsense = networks.Network(summary=True)
+                self.model = sixthsense.sixthsense(train=False)
+
+        if self.HORUS:
+            horus_filepath = constants.SAVED_MODELS + 'horus.sav'
+            exists = os.path.isfile(horus_filepath)
+            if exists:
+                horus = networks.Network(summary=True)
+                self.model = horus.horus(train=False)
+
+    """ Evaluate models available with seperate data """
+    def evaluate(self):
         pass
+        # """ EVALUATE MODEL """
+        # if self.EVALUATE and self.PROVIDENCE:
+        #     print('Evaluating model')
+        #
+        #     providence_filepath = constants.SAVED_MODELS + 'providence.sav'
+        #     exists = os.path.isfile(providence_filepath)
+        #     if exists:
+        #         eval_x, eval_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+        #         providence_model = pickle.load(open(constants.SAVED_MODELS + 'providence.sav', 'rb'))
+        #         evaluate.predict_test_data(providence_model, eval_x, eval_y, 'Providence')
+        #     else:
+        #         print('No model saved to evaluate; please train a model first')
+        #
+        # if self.EVALUATE and self.SIXTHSENSE:
+        #     print('Evaluating model')
+        #     sixthsense_history = pickle.load(open(constants.SAVED_MODELS + 'sixthsense_history.sav', 'rb'))
+        #     evaluate.plot_accloss_graph(sixthsense_history, 'Sixthsense')
 
-    """ Model 1 Basic 3DCNN for RGB"""
-    def providence(xtrain, ytrain,summary=False, frame_clip=-1):
-        # Input shape
+    """ Retrive data from folders"""
+    def retrive_data(self, folder, rgb=True, mv_type='mag'):
+        data = []
+        sorted_folder = os.listdir(folder)
+        sorted_folder.sort()
+        if rgb:
+            print("Retriving videos from file")
+            for index, filename in enumerate(sorted_folder):
+                cap = cv2.VideoCapture(folder + filename)
+
+                vid = []
+                while True:
+                    ret, img = cap.read()
+                    if not ret:
+                        break
+                    vid.append(img)
+                vid = np.array(vid, dtype=np.float32)
+                data.append(vid)
+        else:
+            print("Retriving motion vectors from file")
+            for index, filename in enumerate(sorted_folder):
+                with open(folder + filename, 'r') as f:
+                    mv = json.load(f)
+                mv_arr = np.array(mv[mv_type], dtype=np.float32)
+                data.append(mv_arr)
+
+        return data
+
+    """ Flip and duplicate videos to increase training set """
+    def flip_duplicate(self, data):
+        flipped_videos = []
+        for video in data:
+            new_video = []
+            for frame in video:
+                new_frame = utilities.flip_img(frame)
+                new_video.append(new_frame)
+            flipped_videos.append(new_video)
+
+        return flipped_videos
+
+    """ Split videos by defined number of frames """
+    def split_frames(self, data, chunk):
+        split_fs = []
+
+        for video in data:
+            split_fs = split_fs + [video[i:i + chunk] for i in range(0, len(video), chunk)]
+
+        split_fs = [item for item in split_fs if len(item) == chunk]
+
+        return split_fs
+
+    """ Prepare training img data """
+    def prepare_training_img_data(self, total_data=1000, frame_clip=-1, test=False):
+        if test:
+            df_data = self.retrive_data(constants.TEST_SEPARATED_DF_FACES)
+        else:
+            df_data = self.retrive_data(constants.TRAIN_SEPARATED_DF_FACES)
+
+        # Split further?
         if frame_clip != -1:
-            input_layer = Input((frame_clip, 100, 100, 3))
+            df_data = self.split_frames(df_data, frame_clip)
+
+        if not test:
+            # Flip and duplicate
+            flipped_df = self.flip_duplicate(df_data)
+            df_data = df_data + flipped_df
+
+        df_labels = [1] * len(df_data)
+        print('Found {} Deepfakes'.format(len(df_data)))
+
+        if test:
+            real_data = self.retrive_data(constants.TEST_SEPARATED_REAL_FACES)
         else:
-            input_layer = Input((20, 100, 100, 3))
-
-        ## Convolutional layers 1
-        conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-        if frame_clip > 5:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
-        else:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
-
-        # Max pooling to obtain the most imformatic features
-        if frame_clip > 5:
-            pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
-        else:
-            pooling_layer1 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer2)
-
-        ## Convolutional layers 2
-        if frame_clip > 8:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
-        else:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 11:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
-        else:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
+            real_data = self.retrive_data(constants.TRAIN_SEPARATED_REAL_FACES)
 
 
-        # Max pooling to obtain the most imformatic features
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 14:
-            pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
-        else:
-            pooling_layer2 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer4)
-
-
-        # Normalize and flatten before feeding it to fully connected classification stage
-        pooling_layer2 = BatchNormalization()(pooling_layer2)
-        flatten_layer = Flatten()(pooling_layer2)
-
-        # Add dropouts to avoid overfitting / perform regularization
-        dense_layer1 = Dense(units=2048, activation='relu')(flatten_layer)
-        dense_layer1 = Dropout(0.4)(dense_layer1)
-        dense_layer2 = Dense(units=512, activation='relu')(dense_layer1)
-        dense_layer2 = Dropout(0.4)(dense_layer2)
-        output_layer = Dense(2, activation='softmax')(dense_layer2)
-
-        # Define the model with input layer and output layer
-        model = Model(inputs=input_layer, outputs=output_layer)
-
-        if summary:
-            print(model.summary())
-
-        model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-        history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
-
-        # Save the model and history to disk
-        filename = constants.SAVED_MODELS + 'providence.sav'
-        pickle.dump(model, open(filename, 'wb'))
-
-        his_filename = constants.SAVED_MODELS + 'providence_history.sav'
-        pickle.dump(history, open(his_filename, 'wb'))
-
-        return model
-
-    """ Model 2 Basic 3DCNN"""
-    def sixthsense(xtrain, ytrain,summary=False, frame_clip=-1):
-
-        # # Input shape
-        # if frame_clip != -1:
-        #     xtrain = xtrain_raw.reshape((len(xtrain_raw),frame_clip, 100, 100, 1))
-        #     input_layer = Input((frame_clip, 100, 100, 1))
-        # else:
-        #     xtrain = xtrain_raw.reshape((len(xtrain_raw), 20, 100, 100, 1))
-        #     input_layer = Input((20, 100, 100, 1))
-
-        # Input shape
+        # Split further?
         if frame_clip != -1:
-            input_layer = Input((frame_clip, 100, 100, 3))
-        else:
-            input_layer = Input((20, 100, 100, 3))
+            real_data = self.split_frames(real_data, frame_clip)
+        if not test:
+            # Flip and duplicate
+            flipped_real = self.flip_duplicate(real_data)
+            real_data = real_data + flipped_real
 
-        ## Convolutional layers 1
-        conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-        if frame_clip > 5:    """ Model 1 Basic 3DCNN for RGB"""
-    def providence(xtrain, ytrain,summary=False, frame_clip=-1):
-        # Input shape
+        real_labels = [0] * len(real_data)
+        print('Found {} Pristine Videos'.format(len(real_data)))
+
+        train_x = df_data[:total_data] + real_data[:total_data]
+        train_y = df_labels[:total_data] + real_labels[:total_data]
+        data = {'Videos': train_x, 'Labels':train_y}
+
+        # Create DataFrame to shuffle
+        data_frame = pd.DataFrame(data)
+        data_frame = shuffle(data_frame, random_state=42)
+
+        # Remove data from memory
+        real_data = []
+        df_data =[]
+
+        return np.array(list(data_frame['Videos'].values)), np.array(to_categorical(list(data_frame['Labels'])))
+
+    """ Prepare training mc data """
+    def prepare_training_mv_data(self, total_data=1000, frame_clip=-1, rgb=True):
+        df_data = retrive_data(constants.TRAIN_MV_DF_FACES, rgb=rgb)
+
+        # # Split further?
         if frame_clip != -1:
-            input_layer = Input((frame_clip, 100, 100, 3))
-        else:
-            input_layer = Input((20, 100, 100, 3))
+            df_data = split_frames(df_data, frame_clip)
 
-        ## Convolutional layers 1
-        conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-        if frame_clip > 5:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
-        else:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
+        df_labels = [1] * len(df_data)
+        print('Found {} Deepfake MVs'.format(len(df_data)))
 
-        # Max pooling to obtain the most imformatic features
-        if frame_clip > 5:
-            pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
-        else:
-            pooling_layer1 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer2)
-
-        ## Convolutional layers 2
-        if frame_clip > 8:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
-        else:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 11:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
-        else:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
-
-
-        # Max pooling to obtain the most imformatic features
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 14:
-            pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
-        else:
-            pooling_layer2 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer4)
-
-
-        # Normalize and flatten before feeding it to fully connected classification stage
-        pooling_layer2 = BatchNormalization()(pooling_layer2)
-        flatten_layer = Flatten()(pooling_layer2)
-
-        # Add dropouts to avoid overfitting / perform regularization
-        dense_layer1 = Dense(units=2048, activation='relu')(flatten_layer)
-        dense_layer1 = Dropout(0.4)(dense_layer1)
-        dense_layer2 = Dense(units=512, activation='relu')(dense_layer1)
-        dense_layer2 = Dropout(0.4)(dense_layer2)
-        output_layer = Dense(2, activation='softmax')(dense_layer2)
-
-        # Define the model with input layer and output layer
-        model = Model(inputs=input_layer, outputs=output_layer)
-
-        if summary:
-            print(model.summary())
-
-        model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-        history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
-
-        # Save the model and history to disk
-        filename = constants.SAVED_MODELS + 'providence.sav'
-        pickle.dump(model, open(filename, 'wb'))
-
-        his_filename = constants.SAVED_MODELS + 'providence_history.sav'
-        pickle.dump(history, open(his_filename, 'wb'))
-
-        return model
-
-    """ Model 2 Basic 3DCNN"""
-    def sixthsense(xtrain, ytrain,summary=False, frame_clip=-1):
-
-        # # Input shape
-        # if frame_clip != -1:
-        #     xtrain = xtrain_raw.reshape((len(xtrain_raw),frame_clip, 100, 100, 1))
-        #     input_layer = Input((frame_clip, 100, 100, 1))
-        # else:
-        #     xtrain = xtrain_raw.reshape((len(xtrain_raw), 20, 100, 100, 1))
-        #     input_layer = Input((20, 100, 100, 1))
-
-        # Input shape
+        real_data = self.retrive_data(constants.TRAIN_MV_REAL_FACES, rgb=rgb)
+        # Split further?
         if frame_clip != -1:
-            input_layer = Input((frame_clip, 100, 100, 3))
-        else:
-            input_layer = Input((20, 100, 100, 3))
+            real_data = self.split_frames(real_data, frame_clip)
 
-        ## Convolutional layers 1
-        conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-        if frame_clip > 5:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
-        else:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
+        real_labels = [0] * len(real_data)
+        print('Found {} Pristine MVs'.format(len(real_data)))
 
-        # Max pooling to obtain the most imformatic features
-        if frame_clip > 5:
-            pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
-        else:
-            pooling_layer1 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer2)
+        train_x = df_data[:total_data] + real_data[:total_data]
+        train_y = df_labels[:total_data] + real_labels[:total_data]
+        data = {'MVs': train_x, 'Labels':train_y}
 
-        ## Convolutional layers 2
-        if frame_clip > 8:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
-        else:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 11:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
-        else:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
+        # Create DataFrame to shuffle
+        data_frame = pd.DataFrame(data)
+        data_frame = shuffle(data_frame, random_state=42)
 
+        # Remove data from memory
+        real_data = []
+        df_data =[]
 
-        # Max pooling to obtain the most imformatic features
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 14:
-            pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
-        else:
-            pooling_layer2 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer4)
-
-
-        # Normalize and flatten before feeding it to fully connected classification stage
-        pooling_layer2 = BatchNormalization()(pooling_layer2)
-        flatten_layer = Flatten()(pooling_layer2)
-
-        # Add dropouts to avoid overfitting / perform regularization
-        dense_layer1 = Dense(units=512, activation='relu')(flatten_layer)
-        dense_layer1 = Dropout(0.4)(dense_layer1)
-        dense_layer2 = Dense(units=256, activation='relu')(dense_layer1)
-        dense_layer2 = Dropout(0.4)(dense_layer2)
-        output_layer = Dense(2, activation='softmax')(dense_layer2)
-
-        # Define the model with input layer and output layer
-        model = Model(inputs=input_layer, outputs=output_layer)
-
-        if summary:
-            print(model.summary())
-
-        model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-        history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
-
-        # Save the model and history to disk
-        filename = constants.SAVED_MODELS + 'sixthsense.sav'
-        pickle.dump(model, open(filename, 'wb'))
-
-        his_filename = constants.SAVED_MODELS + 'sixthsense_history.sav'
-        pickle.dump(history, open(his_filename, 'wb'))
-
-        return model
-
-    """ Model 3 Basic 3DCNN"""
-    def horus(xtrain, ytrain,summary=False, frame_clip=-1):
-
-        # # Input shape
-        # if frame_clip != -1:
-        #     xtrain = xtrain_raw.reshape((len(xtrain_raw),frame_clip, 100, 100, 1))
-        #     input_layer = Input((frame_clip, 100, 100, 1))
-        # else:
-        #     xtrain = xtrain_raw.reshape((len(xtrain_raw), 20, 100, 100, 1))
-        #     input_layer = Input((20, 100, 100, 1))
-
-        # Input shape
-        if frame_clip != -1:
-            input_layer = Input((frame_clip, 100, 100, 3))
-        else:
-            input_layer = Input((20, 100, 100, 3))
-
-        ## Convolutional layers 1
-        conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-        if frame_clip > 5:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
-        else:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
-
-        # Max pooling to obtain the most imformatic features
-        if frame_clip > 5:
-            pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
-        else:
-            pooling_layer1 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer2)
-
-        ## Convolutional layers 2
-        if frame_clip > 8:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
-        else:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 11:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
-        else:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
-
-
-        # Max pooling to obtain the most imformatic features
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 14:
-            pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
-        else:
-            pooling_layer2 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer4)
-
-
-        # Normalize and flatten before feeding it to fully connected classification stage
-        pooling_layer2 = BatchNormalization()(pooling_layer2)
-        flatten_layer = Flatten()(pooling_layer2)
-
-        # Add dropouts to avoid overfitting / perform regularization
-        dense_layer1 = Dense(units=256, activation='relu')(flatten_layer)
-        dense_layer1 = Dropout(0.4)(dense_layer1)
-        dense_layer2 = Dense(units=128, activation='relu')(dense_layer1)
-        dense_layer2 = Dropout(0.4)(dense_layer2)
-        output_layer = Dense(2, activation='softmax')(dense_layer2)
-
-        # Define the model with input layer and output layer
-        model = Model(inputs=input_layer, outputs=output_layer)
-
-        if summary:
-            print(model.summary())
-
-        model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-        history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
-
-        # Save the model and history to disk
-        filename = constants.SAVED_MODELS + 'horus.sav'
-        pickle.dump(model, open(filename, 'wb'))
-
-        his_filename = constants.SAVED_MODELS + 'horus_history.sav'
-        pickle.dump(history, open(his_filename, 'wb'))
-
-        return model
-            conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
-        else:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
-
-        # Max pooling to obtain the most imformatic features
-        if frame_clip > 5:
-            pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
-        else:
-            pooling_layer1 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer2)
-
-        ## Convolutional layers 2
-        if frame_clip > 8:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
-        else:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 11:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
-        else:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
-
-
-        # Max pooling to obtain the most imformatic features
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 14:
-            pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
-        else:
-            pooling_layer2 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer4)
-
-
-        # Normalize and flatten before feeding it to fully connected classification stage
-        pooling_layer2 = BatchNormalization()(pooling_layer2)
-        flatten_layer = Flatten()(pooling_layer2)
-
-        # Add dropouts to avoid overfitting / perform regularization
-        dense_layer1 = Dense(units=512, activation='relu')(flatten_layer)
-        dense_layer1 = Dropout(0.4)(dense_layer1)
-        dense_layer2 = Dense(units=256, activation='relu')(dense_layer1)
-        dense_layer2 = Dropout(0.4)(dense_layer2)
-        output_layer = Dense(2, activation='softmax')(dense_layer2)
-
-        # Define the model with input layer and output layer
-        model = Model(inputs=input_layer, outputs=output_layer)
-
-        if summary:
-            print(model.summary())
-
-        model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-        history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
-
-        # Save the model and history to disk
-        filename = constants.SAVED_MODELS + 'sixthsense.sav'
-        pickle.dump(model, open(filename, 'wb'))
-
-        his_filename = constants.SAVED_MODELS + 'sixthsense_history.sav'
-        pickle.dump(history, open(his_filename, 'wb'))
-
-        return model
-
-    """ Model 3 Basic 3DCNN"""
-    def horus(xtrain, ytrain,summary=False, frame_clip=-1):
-
-        # # Input shape
-        # if frame_clip != -1:
-        #     xtrain = xtrain_raw.reshape((len(xtrain_raw),frame_clip, 100, 100, 1))
-        #     input_layer = Input((frame_clip, 100, 100, 1))
-        # else:
-        #     xtrain = xtrain_raw.reshape((len(xtrain_raw), 20, 100, 100, 1))
-        #     input_layer = Input((20, 100, 100, 1))
-
-        # Input shape
-        if frame_clip != -1:
-            input_layer = Input((frame_clip, 100, 100, 3))
-        else:
-            input_layer = Input((20, 100, 100, 3))
-
-        ## Convolutional layers 1
-        conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-        if frame_clip > 5:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
-        else:
-            conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
-
-        # Max pooling to obtain the most imformatic features
-        if frame_clip > 5:
-            pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
-        else:
-            pooling_layer1 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer2)
-
-        ## Convolutional layers 2
-        if frame_clip > 8:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
-        else:
-            conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 11:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
-        else:
-            conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
-
-
-        # Max pooling to obtain the most imformatic features
-        # When using less frames, we need to reduce kernal size to fit after previous convolutions
-        if frame_clip > 14:
-            pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
-        else:
-            pooling_layer2 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer4)
-
-
-        # Normalize and flatten before feeding it to fully connected classification stage
-        pooling_layer2 = BatchNormalization()(pooling_layer2)
-        flatten_layer = Flatten()(pooling_layer2)
-
-        # Add dropouts to avoid overfitting / perform regularization
-        dense_layer1 = Dense(units=256, activation='relu')(flatten_layer)
-        dense_layer1 = Dropout(0.4)(dense_layer1)
-        dense_layer2 = Dense(units=128, activation='relu')(dense_layer1)
-        dense_layer2 = Dropout(0.4)(dense_layer2)
-        output_layer = Dense(2, activation='softmax')(dense_layer2)
-
-        # Define the model with input layer and output layer
-        model = Model(inputs=input_layer, outputs=output_layer)
-
-        if summary:
-            print(model.summary())
-
-        model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-        history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
-
-        # Save the model and history to disk
-        filename = constants.SAVED_MODELS + 'horus.sav'
-        pickle.dump(model, open(filename, 'wb'))
-
-        his_filename = constants.SAVED_MODELS + 'horus_history.sav'
-        pickle.dump(history, open(his_filename, 'wb'))
-
-        return model
+        return np.array(list(data_frame['MVs'].values)), np.array(to_categorical(list(data_frame['Labels'])))

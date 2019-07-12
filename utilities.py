@@ -1,13 +1,9 @@
 import cv2
 import os
 
-
 def init_video(filepath):
-
     vid = cv2.VideoCapture(filepath)
-
     return vid
-
 
 def get_frame_values(file_path):
     frame_rates = []
@@ -22,15 +18,4 @@ def flip_img(img):
     horizontal_img = img.copy()
     # flip img horizontally
     horizontal_img = cv2.flip( img, 0 )
-
     return horizontal_img
-
-# This is now done within the raw file processing
-# def standardise_fps(file_path):
-#     for index, filename in enumerate(os.listdir(file_path)):
-#         # If video file
-#         if filename.endswith(".mp4"):
-#             print(file_path + filename)
-#             print(TRAIN_FPS_DEEPFAKES + filename)
-#             command = "ffmpeg -i {} -r 22 -y {}".format(file_path + filename, TRAIN_FPS_DEEPFAKES + filename)
-#             subprocess.call(command, shell=True)
