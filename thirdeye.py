@@ -15,6 +15,7 @@ import json
 
 class Thirdeye:
     """ Initialize Class """
+    """ TODO SHOULD TAKE IN MODEL NAME AND PICK 1 MODEL TO USE !!!!"""
     def __init__(self, pre_p=False, force_t=False, p=False, s=False, h=False, evaluate=False, max_f_class=100000, frame_c=3):
         self.PRE_PROCESSING = pre_p
         self.PROVIDENCE = p
@@ -66,6 +67,9 @@ class Thirdeye:
             # else:
         self.load()
 
+        if self.EVALUATE:
+            self.evaluate()
+
     """ Preprocess data """
     def preprocess(self):
         preprocessing.handle_train_files()
@@ -97,7 +101,7 @@ class Thirdeye:
     """ Load saved models """
     def load(self):
         if not self.PROVIDENCE and self.SIXTHSENSE and self.HORUS:
-            print('No active model to evaluate!')
+            print('No active model to load!')
         if self.PROVIDENCE:
             providence_filepath = constants.SAVED_MODELS + 'providence.sav'
             exists = os.path.isfile(providence_filepath)
@@ -121,24 +125,28 @@ class Thirdeye:
 
     """ Evaluate models available with seperate data """
     def evaluate(self):
-        pass
-        # """ EVALUATE MODEL """
-        # if self.EVALUATE and self.PROVIDENCE:
-        #     print('Evaluating model')
-        #
-        #     providence_filepath = constants.SAVED_MODELS + 'providence.sav'
-        #     exists = os.path.isfile(providence_filepath)
-        #     if exists:
-        #         eval_x, eval_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
-        #         providence_model = pickle.load(open(constants.SAVED_MODELS + 'providence.sav', 'rb'))
-        #         evaluate.predict_test_data(providence_model, eval_x, eval_y, 'Providence')
-        #     else:
-        #         print('No model saved to evaluate; please train a model first')
-        #
-        # if self.EVALUATE and self.SIXTHSENSE:
-        #     print('Evaluating model')
-        #     sixthsense_history = pickle.load(open(constants.SAVED_MODELS + 'sixthsense_history.sav', 'rb'))
-        #     evaluate.plot_accloss_graph(sixthsense_history, 'Sixthsense')
+        if not self.PROVIDENCE and self.SIXTHSENSE and self.HORUS:
+            print('No active model to evaluate!')
+
+        eval_x, eval_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+
+        if self.PROVIDENCE:
+            history = pickle.load(open(constants.SAVED_MODELS + 'providence_history.sav', 'rb'))
+            eval = evaluate.Evaluator(self.model)
+            eval.plot_accloss_graph(history, 'Providence')
+            eval.predict_test_data(eval_x, eval_y, 'Providence')
+
+        if self.SIXTHSENSE:
+            history = pickle.load(open(constants.SAVED_MODELS + 'sixthsense_history.sav', 'rb'))
+            eval = evaluate.Evaluator(self.model)
+            eval.plot_accloss_graph(history, 'Sixthsense')
+            eval.predict_test_data(eval_x, eval_y, 'Sixthsense')
+
+        if self.HORUS:
+            history = pickle.load(open(constants.SAVED_MODELS + 'horus_history.sav', 'rb'))
+            eval = evaluate.Evaluator(self.model)
+            eval.plot_accloss_graph(history, 'Horus')
+            eval.predict_test_data(eval_x, eval_y, 'Horus')
 
     """ Retrive data from folders"""
     def retrive_data(self, folder, rgb=True, mv_type='mag'):

@@ -77,7 +77,7 @@ class Network:
                 print(model.summary())
 
             model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
+            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.1, verbose=2)
 
             # Save the model and history to disk
             filename = constants.SAVED_MODELS + 'providence.sav'
@@ -162,7 +162,7 @@ class Network:
                 print(model.summary())
 
             model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
+            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.1, verbose=2)
 
             # Save the model and history to disk
             filename = constants.SAVED_MODELS + 'sixthsense.sav'
@@ -249,7 +249,7 @@ class Network:
                 print(model.summary())
 
             model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
+            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.1, verbose=2)
 
             # Save the model and history to disk
             filename = constants.SAVED_MODELS + 'horus.sav'

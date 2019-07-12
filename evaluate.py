@@ -4,7 +4,7 @@ import constants
 import time
 
 class Evaluator:
-    def __init__(model):
+    def __init__(self, model):
         self.model = model
 
     def plot_accloss_graph(self, histroy, name):
@@ -17,6 +17,7 @@ class Evaluator:
         plt.show()
 
     def predict_test_data(self, x, y, name):
+        # TODO Check size is correct and resize?
         start = time.time()
         predictions = self.model.predict(x)
         end = time.time()
