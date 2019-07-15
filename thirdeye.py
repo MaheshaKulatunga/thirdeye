@@ -15,56 +15,25 @@ import json
 
 class Thirdeye:
     """ Initialize Class """
-    """ TODO SHOULD TAKE IN MODEL NAME AND PICK 1 MODEL TO USE !!!!"""
-    def __init__(self, pre_p=False, force_t=False, p=False, s=False, h=False, evaluate=False, max_f_class=100000, frame_c=3):
+    def __init__(self, pre_p=False, force_t=False, name='providence', evaluate=False, max_f_class=100000, frame_c=3):
         self.PRE_PROCESSING = pre_p
-        self.PROVIDENCE = p
-        self.SIXTHSENSE = s
-        self.HORUS = h
         self.FORCE_TRAIN = force_t
         self.EVALUATE = evaluate
         self.model = None
+        self.name = name
+        self.title = name.capitalize()
         self.MAX_FOR_CLASS = max_f_class
         self.FRAME_CLIP = frame_c
 
         if self.PRE_PROCESSING:
             self.preprocess()
 
-        """" TRAIN MODELS IF NOT ALREADY SAVED """""
-        if self.PROVIDENCE:
-            # Traing model 1 - Providence
-            providence_filepath = constants.SAVED_MODELS + 'providence.sav'
-            exists = os.path.isfile(providence_filepath)
-            if not exists or self.FORCE_TRAIN:
-                print('Training Providence.')
-                train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                providence = networks.Network(summary=True)
-                providence.providence(train_x, train_y, frame_clip=self.FRAME_CLIP)
-            # else:
-            #     self.load()
+        # """" TRAIN MODELS IF NOT ALREADY SAVED """""
+        filepath = constants.SAVED_MODELS + self.name + '.sav'
+        exists = os.path.isfile(filepath)
+        if not exists or self.FORCE_TRAIN:
+            self.train()
 
-        if self.SIXTHSENSE:
-            # Traing model 2 - Sixthsense
-            sixthsense_filepath = constants.SAVED_MODELS + 'sixthsense.sav'
-            exists = os.path.isfile(sixthsense_filepath)
-            if not exists or self.FORCE_TRAIN:
-                print('Training Sixthsense')
-                train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                sixthsense = networks.Network(summary=True)
-                sixthsense.sixthsense(train_x, train_y, frame_clip=self.FRAME_CLIP)
-            # else:
-            #     self.load()
-
-        if self.HORUS:
-            # Traing model 2 - Sixthsense
-            horus_filepath = constants.SAVED_MODELS + 'horus.sav'
-            exists = os.path.isfile(horus_filepath)
-            if not exists or self.FORCE_TRAIN:
-                print('Training Horus')
-                train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                horus = networks.Network(summary=True)
-                horus.horus(train_x, train_y, frame_clip=self.FRAME_CLIP)
-            # else:
         self.load()
 
         if self.EVALUATE:
@@ -77,76 +46,47 @@ class Thirdeye:
 
     """ Train data """
     def train(self):
-        if not self.PROVIDENCE and self.SIXTHSENSE and self.HORUS:
-            print('No active model to train!')
+        print('Training {}'.format(self.title))
+        train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+        model = networks.Network(summary=True)
 
-        if self.PROVIDENCE:
-            print('Training Providence.')
-            train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-            providence = networks.Network(summary=True)
-            self.model = providence.providence(train_x, train_y, frame_clip=self.FRAME_CLIP)
+        if self.name == 'providence':
+            self.model = model.providence(train_x, train_y, frame_clip=self.FRAME_CLIP)
 
-        if self.SIXTHSENSE:
-            print('Training Sixthsense')
-            train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-            sixthsense = networks.Network(summary=True)
-            self.model = sixthsense.sixthsense(train_x, train_y, frame_clip=self.FRAME_CLIP)
+        if self.name == 'sixthsense':
+            self.model = model.sixthsense(train_x, train_y, frame_clip=self.FRAME_CLIP)
 
-        if self.HORUS:
-            print('Training Horus')
-            train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-            horus = networks.Network(summary=True)
-            self.model = horus.horus(train_x, train_y, frame_clip=self.FRAME_CLIP)
+        if self.name == 'horus':
+            self.model = model.horus(train_x, train_y, frame_clip=self.FRAME_CLIP)
 
     """ Load saved models """
     def load(self):
-        if not self.PROVIDENCE and self.SIXTHSENSE and self.HORUS:
-            print('No active model to load!')
-        if self.PROVIDENCE:
-            providence_filepath = constants.SAVED_MODELS + 'providence.sav'
-            exists = os.path.isfile(providence_filepath)
-            if exists:
-                providence = networks.Network(summary=True)
-                self.model = providence.providence(train=False)
+        filepath = constants.SAVED_MODELS + self.name + '.sav'
+        exists = os.path.isfile(filepath)
+        if exists:
+            model = networks.Network(summary=True)
 
-        if self.SIXTHSENSE:
-            sixthsense_filepath = constants.SAVED_MODELS + 'sixthsense.sav'
-            exists = os.path.isfile(sixthsense_filepath)
-            if exists:
-                sixthsense = networks.Network(summary=True)
-                self.model = sixthsense.sixthsense(train=False)
+            if self.name == 'providence':
+                self.model = model.providence(train=False)
 
-        if self.HORUS:
-            horus_filepath = constants.SAVED_MODELS + 'horus.sav'
-            exists = os.path.isfile(horus_filepath)
-            if exists:
-                horus = networks.Network(summary=True)
-                self.model = horus.horus(train=False)
+            if self.name == 'sixthsense':
+                self.model = model.sixthsense(train=False)
+
+            if self.name == 'horus':
+                self.model = model.horus(train=False)
+        else:
+            print('No saved model!')
+            exit()
 
     """ Evaluate models available with seperate data """
     def evaluate(self):
-        if not self.PROVIDENCE and self.SIXTHSENSE and self.HORUS:
-            print('No active model to evaluate!')
-
         eval_x, eval_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
 
-        if self.PROVIDENCE:
-            history = pickle.load(open(constants.SAVED_MODELS + 'providence_history.sav', 'rb'))
-            eval = evaluate.Evaluator(self.model)
-            eval.plot_accloss_graph(history, 'Providence')
-            eval.predict_test_data(eval_x, eval_y, 'Providence')
-
-        if self.SIXTHSENSE:
-            history = pickle.load(open(constants.SAVED_MODELS + 'sixthsense_history.sav', 'rb'))
-            eval = evaluate.Evaluator(self.model)
-            eval.plot_accloss_graph(history, 'Sixthsense')
-            eval.predict_test_data(eval_x, eval_y, 'Sixthsense')
-
-        if self.HORUS:
-            history = pickle.load(open(constants.SAVED_MODELS + 'horus_history.sav', 'rb'))
-            eval = evaluate.Evaluator(self.model)
-            eval.plot_accloss_graph(history, 'Horus')
-            eval.predict_test_data(eval_x, eval_y, 'Horus')
+        history = pickle.load(open(constants.SAVED_MODELS + self.name + '_history.sav', 'rb'))
+        print('History of {} loaded'.format(self.title))
+        eval = evaluate.Evaluator(self.model)
+        eval.plot_accloss_graph(history, self.title)
+        eval.predict_test_data(eval_x, eval_y, self.title)
 
     """ Retrive data from folders"""
     def retrive_data(self, folder, rgb=True, mv_type='mag'):
