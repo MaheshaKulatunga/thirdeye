@@ -3,9 +3,9 @@ import pickle
 
 class Classifier:
 
-    def __init__(self, model, video):
+    def __init__(self, model):
         self.model = model
-        self.video = video
 
     def classify_video(self, video):
-        pass
+        prediction = self.model.predict([video])
+        return prediction

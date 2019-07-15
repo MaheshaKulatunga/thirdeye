@@ -47,14 +47,14 @@ class Thirdeye:
     """ Train data """
     def train(self):
         print('Training {}'.format(self.title))
-        train_x, train_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+        train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
         model = networks.Network(summary=True)
 
         if self.name == 'providence':
             self.model = model.providence(train_x, train_y, frame_clip=self.FRAME_CLIP)
 
-        if self.name == 'sixthsense':
-            self.model = model.sixthsense(train_x, train_y, frame_clip=self.FRAME_CLIP)
+        if self.name == 'odin':
+            self.model = model.odin(train_x, train_y, frame_clip=self.FRAME_CLIP)
 
         if self.name == 'horus':
             self.model = model.horus(train_x, train_y, frame_clip=self.FRAME_CLIP)
@@ -69,8 +69,8 @@ class Thirdeye:
             if self.name == 'providence':
                 self.model = model.providence(train=False)
 
-            if self.name == 'sixthsense':
-                self.model = model.sixthsense(train=False)
+            if self.name == 'odin':
+                self.model = model.odin(train=False)
 
             if self.name == 'horus':
                 self.model = model.horus(train=False)
@@ -80,13 +80,28 @@ class Thirdeye:
 
     """ Evaluate models available with seperate data """
     def evaluate(self):
-        eval_x, eval_y = self.prepare_training_img_data(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+        eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
 
         history = pickle.load(open(constants.SAVED_MODELS + self.name + '_history.sav', 'rb'))
         print('History of {} loaded'.format(self.title))
         eval = evaluate.Evaluator(self.model)
         eval.plot_accloss_graph(history, self.title)
         eval.predict_test_data(eval_x, eval_y, self.title)
+
+    def classify(self):
+        # preprocessing.handle_unknown_files()
+        filenames = os.listdir(constants.UNKNOWN_SEP)
+        filenames.sort()
+        unknown_videos = self.retrive_data(constants.UNKNOWN_SEP)
+
+        classifier = classify.Classifier(self.model)
+
+        for index,video in enumerate(unknown_videos):
+            print(filenames[index])
+            print(unknown_videos[index])
+
+        print(filenames)
+
 
     """ Retrive data from folders"""
     def retrive_data(self, folder, rgb=True, mv_type='mag'):
@@ -140,7 +155,7 @@ class Thirdeye:
         return split_fs
 
     """ Prepare training img data """
-    def prepare_training_img_data(self, total_data=1000, frame_clip=-1, test=False):
+    def prepare_rgb_input(self, total_data=1000, frame_clip=-1, test=False):
         if test:
             df_data = self.retrive_data(constants.TEST_SEPARATED_DF_FACES)
         else:
@@ -190,7 +205,7 @@ class Thirdeye:
         return np.array(list(data_frame['Videos'].values)), np.array(to_categorical(list(data_frame['Labels'])))
 
     """ Prepare training mc data """
-    def prepare_training_mv_data(self, total_data=1000, frame_clip=-1, rgb=True):
+    def prepare_mv_input(self, total_data=1000, frame_clip=-1, rgb=True):
         df_data = retrive_data(constants.TRAIN_MV_DF_FACES, rgb=rgb)
 
         # # Split further?

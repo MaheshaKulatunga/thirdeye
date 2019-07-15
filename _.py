@@ -172,7 +172,7 @@ if __name__ == "__main__":
     EVALUATE = False
     # Activate models
     PROVIDENCE = True
-    SIXTHSENSE = True
+    ODIN = True
     HORUS = True
 
     """ PREPROCESSING """
@@ -193,27 +193,27 @@ if __name__ == "__main__":
         else:
             print('Providence is ready.')
 
-    if SIXTHSENSE and not EVALUATE:
+    if ODIN and not EVALUATE:
 
-        # Traing model 2 - Sixthsense
-        providence_filepath = constants.SAVED_MODELS + 'sixthsense.sav'
+        # Traing model 2 - Odin
+        providence_filepath = constants.SAVED_MODELS + 'odin.sav'
         exists = os.path.isfile(providence_filepath)
         if not exists or FORCE_TRAIN:
-            print('Training Sixthsense')
+            print('Training Odin')
             train_x, train_y = prepare_training_img_data(MAX_FOR_CLASS, FRAME_CLIP)
-            model = networks.sixthsense(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
+            model = networks.odin(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
         else:
-            print('Sixthsense is ready.')
+            print('Odin is ready.')
 
     if HORUS and not EVALUATE:
 
-        # Traing model 2 - Sixthsense
+        # Traing model 2 - Odin
         providence_filepath = constants.SAVED_MODELS + 'horus.sav'
         exists = os.path.isfile(providence_filepath)
         if not exists or FORCE_TRAIN:
             print('Training Horus')
             train_x, train_y = prepare_training_img_data(MAX_FOR_CLASS, FRAME_CLIP)
-            model = networks.sixthsense(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
+            model = networks.odin(train_x, train_y, summary=True, frame_clip=FRAME_CLIP)
         else:
             print('Horus is ready.')
 
@@ -233,7 +233,7 @@ if __name__ == "__main__":
         # providence_history = pickle.load(open(constants.SAVED_MODELS + 'providence_history.sav', 'rb'))
         # evaluate.plot_accloss_graph(providence_history, 'Providence')
 
-    if EVALUATE and SIXTHSENSE:
+    if EVALUATE and ODIN:
         print('Evaluating model')
-        sixthsense_history = pickle.load(open(constants.SAVED_MODELS + 'sixthsense_history.sav', 'rb'))
-        evaluate.plot_accloss_graph(sixthsense_history, 'Sixthsense')
+        odin_history = pickle.load(open(constants.SAVED_MODELS + 'odin_history.sav', 'rb'))
+        evaluate.plot_accloss_graph(odin_history, 'Odin')

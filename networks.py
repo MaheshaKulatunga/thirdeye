@@ -96,7 +96,7 @@ class Network:
         return model
 
     """ Model 2 Basic 3DCNN"""
-    def sixthsense(self, xtrain=[], ytrain=[], frame_clip=-1, train=True):
+    def odin(self, xtrain=[], ytrain=[], frame_clip=-1, train=True):
         summary=self.summary
 
         if train:
@@ -165,17 +165,17 @@ class Network:
             history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.1, verbose=2)
 
             # Save the model and history to disk
-            filename = constants.SAVED_MODELS + 'sixthsense.sav'
+            filename = constants.SAVED_MODELS + 'odin.sav'
             pickle.dump(model, open(filename, 'wb'))
 
-            his_filename = constants.SAVED_MODELS + 'sixthsense_history.sav'
+            his_filename = constants.SAVED_MODELS + 'odin_history.sav'
             pickle.dump(history, open(his_filename, 'wb'))
         else:
-            sixthsense_filepath = constants.SAVED_MODELS + 'sixthsense.sav'
-            exists = os.path.isfile(sixthsense_filepath)
+            odin_filepath = constants.SAVED_MODELS + 'odin.sav'
+            exists = os.path.isfile(odin_filepath)
             if exists:
-                model = pickle.load(open(constants.SAVED_MODELS + 'sixthsense.sav', 'rb'))
-                print('Sixthsense is ready.')
+                model = pickle.load(open(constants.SAVED_MODELS + 'odin.sav', 'rb'))
+                print('Odin is ready.')
             else:
                 prin('No saved model detected!')
 
