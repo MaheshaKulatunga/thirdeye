@@ -7,5 +7,5 @@ class Classifier:
         self.model = model
 
     def classify_video(self, video):
-        prediction = self.model.predict([video])
+        prediction = self.model.predict(video)
         return prediction

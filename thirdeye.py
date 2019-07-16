@@ -88,20 +88,45 @@ class Thirdeye:
         eval.plot_accloss_graph(history, self.title)
         eval.predict_test_data(eval_x, eval_y, self.title)
 
+    """ Classify an unknown video """
     def classify(self):
         # preprocessing.handle_unknown_files()
         filenames = os.listdir(constants.UNKNOWN_SEP)
         filenames.sort()
         unknown_videos = self.retrive_data(constants.UNKNOWN_SEP)
+        unknown_clips = self.split_frames(unknown_videos, self.FRAME_CLIP)
 
         classifier = classify.Classifier(self.model)
 
-        for index,video in enumerate(unknown_videos):
-            print(filenames[index])
-            print(unknown_videos[index])
+        pred = classifier.classify_video([unknown_clips])
 
-        print(filenames)
+        n_averaged_elements = 6
+        averaged_array = []
+        a = pred
+        for i in range(0, len(a), n_averaged_elements):
+            slice_from_index = i
+            slice_to_index = slice_from_index + n_averaged_elements
+            slice = a[slice_from_index:slice_to_index]
+            class_1_avg = 0
+            class_2_avg = 0
+            for val in slice:
+               class_1_avg += val[0]
+               class_2_avg += val[1]
 
+            class_1_avg = class_1_avg/ n_averaged_elements
+            class_2_avg = class_2_avg/ n_averaged_elements
+
+            averaged_array.append([class_1_avg, class_2_avg])
+
+        pred_b = averaged_array
+        # corr = 0
+        for index, video in enumerate(unknown_videos):
+            if pred_b[index][0] > pred_b[index][1]:
+                label = 'Real'
+            else:
+                label = 'Deepfake'
+
+            print('{}: {}'.format(filenames[index], label))
 
     """ Retrive data from folders"""
     def retrive_data(self, folder, rgb=True, mv_type='mag'):

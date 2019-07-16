@@ -25,14 +25,14 @@ class Evaluator:
         count = 0
         for pred in range(len(predictions)):
             if predictions[pred][0] > predictions[pred][1]:
-                label = 1
-            else:
                 label = 0
+            else:
+                label = 1
 
             if y[pred][0] > y[pred][1]:
-                true = 1
-            else:
                 true = 0
+            else:
+                true = 1
 
             if label is true:
                 count += 1
