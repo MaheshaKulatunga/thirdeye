@@ -90,71 +90,13 @@ class Thirdeye:
 
     """ Classify an unknown video """
     def classify(self):
-        # preprocessing.handle_unknown_files()
-        filenames = os.listdir(constants.UNKNOWN_SEP)
-        filenames.sort()
-        unknown_videos = self.retrive_data(constants.UNKNOWN_SEP)
-        unknown_clips = self.split_frames(unknown_videos, self.FRAME_CLIP)
 
-        classifier = classify.Classifier(self.model)
+        if len(os.listdir(constants.UNKNOWN_RAW)) > 0:
+            preprocessing.handle_unknown_files()
+        classifier = classify.Classifier(self.model, constants.UNKNOWN_SEP, self.FRAME_CLIP)
+        classifier.classify_videos()
+        utilities.clear_folder(constants.UNKNOWN_SEP)
 
-        pred = classifier.classify_video([unknown_clips])
-
-        n_averaged_elements = 6
-        averaged_array = []
-        a = pred
-        for i in range(0, len(a), n_averaged_elements):
-            slice_from_index = i
-            slice_to_index = slice_from_index + n_averaged_elements
-            slice = a[slice_from_index:slice_to_index]
-            class_1_avg = 0
-            class_2_avg = 0
-            for val in slice:
-               class_1_avg += val[0]
-               class_2_avg += val[1]
-
-            class_1_avg = class_1_avg/ n_averaged_elements
-            class_2_avg = class_2_avg/ n_averaged_elements
-
-            averaged_array.append([class_1_avg, class_2_avg])
-
-        pred_b = averaged_array
-        # corr = 0
-        for index, video in enumerate(unknown_videos):
-            if pred_b[index][0] > pred_b[index][1]:
-                label = 'Real'
-            else:
-                label = 'Deepfake'
-
-            print('{}: {}'.format(filenames[index], label))
-
-    """ Retrive data from folders"""
-    def retrive_data(self, folder, rgb=True, mv_type='mag'):
-        data = []
-        sorted_folder = os.listdir(folder)
-        sorted_folder.sort()
-        if rgb:
-            print("Retriving videos from file")
-            for index, filename in enumerate(sorted_folder):
-                cap = cv2.VideoCapture(folder + filename)
-
-                vid = []
-                while True:
-                    ret, img = cap.read()
-                    if not ret:
-                        break
-                    vid.append(img)
-                vid = np.array(vid, dtype=np.float32)
-                data.append(vid)
-        else:
-            print("Retriving motion vectors from file")
-            for index, filename in enumerate(sorted_folder):
-                with open(folder + filename, 'r') as f:
-                    mv = json.load(f)
-                mv_arr = np.array(mv[mv_type], dtype=np.float32)
-                data.append(mv_arr)
-
-        return data
 
     """ Flip and duplicate videos to increase training set """
     def flip_duplicate(self, data):
@@ -168,27 +110,16 @@ class Thirdeye:
 
         return flipped_videos
 
-    """ Split videos by defined number of frames """
-    def split_frames(self, data, chunk):
-        split_fs = []
-
-        for video in data:
-            split_fs = split_fs + [video[i:i + chunk] for i in range(0, len(video), chunk)]
-
-        split_fs = [item for item in split_fs if len(item) == chunk]
-
-        return split_fs
-
     """ Prepare training img data """
     def prepare_rgb_input(self, total_data=1000, frame_clip=-1, test=False):
         if test:
-            df_data = self.retrive_data(constants.TEST_SEPARATED_DF_FACES)
+            df_data = utilities.retrieve_data(constants.TEST_SEPARATED_DF_FACES)
         else:
-            df_data = self.retrive_data(constants.TRAIN_SEPARATED_DF_FACES)
+            df_data = utilities.retrieve_data(constants.TRAIN_SEPARATED_DF_FACES)
 
         # Split further?
         if frame_clip != -1:
-            df_data = self.split_frames(df_data, frame_clip)
+            df_data = utilities.split_frames(df_data, frame_clip)
 
         if not test:
             # Flip and duplicate
@@ -199,14 +130,14 @@ class Thirdeye:
         print('Found {} Deepfakes'.format(len(df_data)))
 
         if test:
-            real_data = self.retrive_data(constants.TEST_SEPARATED_REAL_FACES)
+            real_data = utilities.retrieve_data(constants.TEST_SEPARATED_REAL_FACES)
         else:
-            real_data = self.retrive_data(constants.TRAIN_SEPARATED_REAL_FACES)
+            real_data = utilities.retrieve_data(constants.TRAIN_SEPARATED_REAL_FACES)
 
 
         # Split further?
         if frame_clip != -1:
-            real_data = self.split_frames(real_data, frame_clip)
+            real_data = utilities.split_frames(real_data, frame_clip)
         if not test:
             # Flip and duplicate
             flipped_real = self.flip_duplicate(real_data)
@@ -231,19 +162,19 @@ class Thirdeye:
 
     """ Prepare training mc data """
     def prepare_mv_input(self, total_data=1000, frame_clip=-1, rgb=True):
-        df_data = retrive_data(constants.TRAIN_MV_DF_FACES, rgb=rgb)
+        df_data = utilities.retrieve_data(constants.TRAIN_MV_DF_FACES, rgb=rgb)
 
         # # Split further?
         if frame_clip != -1:
-            df_data = split_frames(df_data, frame_clip)
+            df_data = utilities.split_frames(df_data, frame_clip)
 
         df_labels = [1] * len(df_data)
         print('Found {} Deepfake MVs'.format(len(df_data)))
 
-        real_data = self.retrive_data(constants.TRAIN_MV_REAL_FACES, rgb=rgb)
+        real_data = utilities.retrieve_data(constants.TRAIN_MV_REAL_FACES, rgb=rgb)
         # Split further?
         if frame_clip != -1:
-            real_data = self.split_frames(real_data, frame_clip)
+            real_data = utilities.split_frames(real_data, frame_clip)
 
         real_labels = [0] * len(real_data)
         print('Found {} Pristine MVs'.format(len(real_data)))

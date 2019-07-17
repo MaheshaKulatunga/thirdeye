@@ -42,7 +42,6 @@ def get_largest_face_size(video):
         count += 1
     return largest_face_width_i, largest_face_height_i
 
-
 def split_raw_videos(clip_size, file_path, fps_path, output_path):
     # Loop through files in folder
     for index, filename in enumerate(os.listdir(file_path)):
@@ -73,14 +72,12 @@ def split_raw_videos(clip_size, file_path, fps_path, output_path):
             print('Warning: Incompatible file')
     print('File split Complete')
 
-
 def crop_videos(file_path, output_folder, box_bias, box_size, frames):
     # Loop through files in folder
     for index, filename in enumerate(os.listdir(file_path)):
         # If video file
         if filename.endswith(".mp4") or filename.endswith(".avi"):
             facial_extraction(file_path, filename, output_folder, box_bias, box_size, frames)
-
 
 def facial_extraction(folder, file_name, output_folder, box_bias, box_size, frames):
     print('Dealing with video {}'.format(file_name))
@@ -169,7 +166,6 @@ def facial_extraction(folder, file_name, output_folder, box_bias, box_size, fram
     input_movie.release()
     cv2.destroyAllWindows()
 
-
 def motion_vector_extraction(input_folder, output_folder, frames, box_size):
     # Loop through files in folder
     for index, filename in enumerate(os.listdir(input_folder)):
@@ -252,6 +248,7 @@ def handle_train_files():
     else:
         start_time = time.time()
         split_raw_videos(1, constants.RAW_DEEPFAKES, constants.TRAIN_FPS_DEEPFAKES , constants.TRAIN_DEEPFAKES)
+        utilities.clear_folder(constants.TRAIN_FPS_DEEPFAKES)
         print("--- %s seconds ---" % (time.time() - start_time))
 
     print('Looking for videos to crop')
@@ -263,6 +260,7 @@ def handle_train_files():
 
         start_time = time.time()
         crop_videos(constants.TRAIN_DEEPFAKES, constants.TRAIN_SEPARATED_DF_FACES, 20, 100, 20)
+        utilities.clear_folder(constants.TRAIN_DEEPFAKES)
         print("--- %s seconds ---" % (time.time() - start_time))
 
     print('Looking to extract motion vectors')
@@ -279,6 +277,7 @@ def handle_train_files():
     else:
         start_time = time.time()
         split_raw_videos(1, constants.RAW_REAL, constants.TRAIN_FPS_REAL , constants.TRAIN_REAL)
+        utilities.clear_folder(constants.TRAIN_FPS_REAL)
         print("--- %s seconds ---" % (time.time() - start_time))
 
     print('Looking for videos to crop')
@@ -290,6 +289,7 @@ def handle_train_files():
 
         start_time = time.time()
         crop_videos(constants.TRAIN_REAL, constants.TRAIN_SEPARATED_REAL_FACES, 20, 100, 20)
+        utilities.clear_folder(constants.TRAIN_REAL)
         print("--- %s seconds ---" % (time.time() - start_time))
 
     print('Looking to extract motion vectors')
@@ -300,7 +300,6 @@ def handle_train_files():
         motion_vector_extraction(constants.TRAIN_SEPARATED_REAL_FACES, constants.TRAIN_MV_REAL_FACES, 20, 50)
         print("--- %s seconds ---" % (time.time() - start_time))
 
-
 """ Preprocesses testing files """
 def handle_test_files():
         print('Preprocessing videos for testing')
@@ -310,6 +309,8 @@ def handle_test_files():
         else:
             start_time = time.time()
             split_raw_videos(1, constants.TEST_RAW_DEEPFAKES, constants.TEST_FPS_DEEPFAKES , constants.TEST_DEEPFAKES)
+            utilities.clear_folder(constants.TEST_FPS_DEEPFAKES)
+
             print("--- %s seconds ---" % (time.time() - start_time))
 
         print('Looking for videos to crop')
@@ -321,6 +322,8 @@ def handle_test_files():
 
             start_time = time.time()
             crop_videos(constants.TEST_DEEPFAKES, constants.TEST_SEPARATED_DF_FACES, 20, 100, 20)
+            utilities.clear_folder(constants.TEST_DEEPFAKES)
+
             print("--- %s seconds ---" % (time.time() - start_time))
 
         print('Looking to extract motion vectors')
@@ -337,6 +340,8 @@ def handle_test_files():
         else:
             start_time = time.time()
             split_raw_videos(1, constants.TEST_RAW_REAL, constants.TEST_FPS_REAL , constants.TEST_REAL)
+            utilities.clear_folder(constants.TEST_FPS_REAL)
+
             print("--- %s seconds ---" % (time.time() - start_time))
 
         print('Looking for videos to crop')
@@ -348,6 +353,7 @@ def handle_test_files():
 
             start_time = time.time()
             crop_videos(constants.TEST_REAL, constants.TEST_SEPARATED_REAL_FACES, 20, 100, 20)
+            utilities.clear_folder(constants.TEST_REAL)
             print("--- %s seconds ---" % (time.time() - start_time))
 
         print('Looking to extract motion vectors')
@@ -366,6 +372,10 @@ def handle_unknown_files():
     else:
         start_time = time.time()
         split_raw_videos(1, constants.UNKNOWN_RAW, constants.UNKNOWN_FPS , constants.UNKNOWN_CLIPS)
+        print('Clearing folders')
+        utilities.clear_folder(constants.UNKNOWN_RAW)
+        utilities.clear_folder(constants.UNKNOWN_FPS)
+
         print("--- %s seconds ---" % (time.time() - start_time))
         print('Looking for videos to crop')
     if len(os.listdir(constants.UNKNOWN_CLIPS)) == 2:
@@ -376,4 +386,5 @@ def handle_unknown_files():
 
         start_time = time.time()
         crop_videos(constants.UNKNOWN_CLIPS, constants.UNKNOWN_SEP, 20, 100, 20)
+        utilities.clear_folder(constants.UNKNOWN_CLIPS)
         print("--- %s seconds ---" % (time.time() - start_time))
