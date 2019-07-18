@@ -2,10 +2,12 @@ import cv2
 import os
 import numpy as np
 
+""" Initialize video """
 def init_video(filepath):
     vid = cv2.VideoCapture(filepath)
     return vid
 
+""" Delete contents of a folder """
 def clear_folder(folder):
     for the_file in os.listdir(folder):
         file_path = os.path.join(folder, the_file)
@@ -18,6 +20,7 @@ def clear_folder(folder):
 
     print('{} cleared'.format(folder))
 
+""" Get number of frames in videos """
 def get_frame_values(file_path):
     frame_rates = []
     for index, filename in enumerate(os.listdir(file_path)):
@@ -27,6 +30,7 @@ def get_frame_values(file_path):
             length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
             frame_rates = frame_rates + [length]
 
+""" Flip transformation on a frame """
 def flip_img(img):
     horizontal_img = img.copy()
     # flip img horizontally
