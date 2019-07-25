@@ -3,7 +3,7 @@ import thirdeye
 if __name__ == "__main__":
     ti = thirdeye.Thirdeye()
     ti.set_network('odin')
-    # ti.train()
+    ti.train()
     ti.evaluate()
     # ti.classify()
 

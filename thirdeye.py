@@ -48,13 +48,13 @@ class Thirdeye:
         model = networks.Network(summary=True)
 
         if self.network == 'providence':
-            self.model = model.providence(train_x, train_y, frame_clip=self.FRAME_CLIP)
+            self.model = model.load_network('providence', train_x, train_y, frame_clip=self.FRAME_CLIP, train=True)
 
         if self.network == 'odin':
-            self.model = model.odin(train_x, train_y, frame_clip=self.FRAME_CLIP)
+            self.model = model.load_network('odin', train_x, train_y, frame_clip=self.FRAME_CLIP, train=True)
 
         if self.network == 'horus':
-            self.model = model.horus(train_x, train_y, frame_clip=self.FRAME_CLIP)
+            self.model = model.load_network('horus', train_x, train_y, frame_clip=self.FRAME_CLIP, train=True)
 
     """ Load saved models """
     def load(self):
@@ -64,16 +64,15 @@ class Thirdeye:
             model = networks.Network(summary=True)
 
             if self.network == 'providence':
-                self.model = model.providence(train=False)
+                self.model = model.load_network('providence')
 
             if self.network == 'odin':
-                self.model = model.odin(train=False)
+                self.model = model.load_network('odin')
 
             if self.network == 'horus':
-                self.model = model.horus(train=False)
+                self.model = model.load_network('horus')
         else:
             print('No saved model!')
-            exit()
 
     """ Evaluate models available with seperate data """
     def evaluate(self):
@@ -81,15 +80,16 @@ class Thirdeye:
 
         history = pickle.load(open(constants.SAVED_MODELS + self.network + '_history.sav', 'rb'))
         print('History of {} loaded'.format(self.title))
+
         eval = evaluate.Evaluator(self.model)
         eval.plot_accloss_graph(history, self.title)
         eval.predict_test_data(eval_x, eval_y, self.title)
 
     """ Classify an unknown video """
     def classify(self):
-
         if len(os.listdir(constants.UNKNOWN_RAW)) > 0:
             preprocessing.handle_unknown_files()
+
         classifier = classify.Classifier(self.model, constants.UNKNOWN_SEP, self.FRAME_CLIP)
         classifier.classify_videos()
         utilities.clear_folder(constants.UNKNOWN_SEP)

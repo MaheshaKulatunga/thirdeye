@@ -15,12 +15,26 @@ import pickle
 import constants
 
 class Network:
-    def __init__(self, summary=False):
+    def __init__(self, summary=False, name=''):
         self.summary = summary
 
-    """ Model 1 Basic 3DCNN for RGB"""
-    def providence(self, xtrain=[], ytrain=[], frame_clip=-1, train=True):
+        if len(name) > 0:
+            load_network(name)
+
+    """ Load model given name """
+    def load_network(self, name, xtrain=[], ytrain=[], frame_clip=-1, train=False):
         summary=self.summary
+
+        if name == 'odin':
+            nodes_1 = 512
+            nodes_2 = 256
+        elif name == 'horus':
+            nodes_1 = 256
+            nodes_2 = 128
+        else:
+            nodes_1 = 2048
+            nodes_2 = 512
+
         if train:
             # Input shape
             if frame_clip != -1:
@@ -64,9 +78,9 @@ class Network:
             flatten_layer = Flatten()(pooling_layer2)
 
             # Add dropouts to avoid overfitting / perform regularization
-            dense_layer1 = Dense(units=2048, activation='relu')(flatten_layer)
+            dense_layer1 = Dense(units=nodes_1, activation='relu')(flatten_layer)
             dense_layer1 = Dropout(0.4)(dense_layer1)
-            dense_layer2 = Dense(units=512, activation='relu')(dense_layer1)
+            dense_layer2 = Dense(units=nodes_2, activation='relu')(dense_layer1)
             dense_layer2 = Dropout(0.4)(dense_layer2)
             output_layer = Dense(2, activation='softmax')(dense_layer2)
 
@@ -77,193 +91,20 @@ class Network:
                 print(model.summary())
 
             model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.1, verbose=2)
+            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
 
             # Save the model and history to disk
-            filename = constants.SAVED_MODELS + 'providence.sav'
+            filename = constants.SAVED_MODELS + name + '.sav'
             pickle.dump(model, open(filename, 'wb'))
 
-            his_filename = constants.SAVED_MODELS + 'providence_history.sav'
+            his_filename = constants.SAVED_MODELS + name + '_history.sav'
             pickle.dump(history, open(his_filename, 'wb'))
         else:
-            providence_filepath = constants.SAVED_MODELS + 'providence.sav'
+            providence_filepath = constants.SAVED_MODELS + name + '.sav'
             exists = os.path.isfile(providence_filepath)
             if exists:
-                model = pickle.load(open(constants.SAVED_MODELS + 'providence.sav', 'rb'))
-                print('Providence is ready.')
+                model = pickle.load(open(constants.SAVED_MODELS + name + '.sav', 'rb'))
+                print('{} is ready.'.format(name.capitalize()))
             else:
                 prin('No saved model detected!')
-        return model
-
-    """ Model 2 Basic 3DCNN"""
-    def odin(self, xtrain=[], ytrain=[], frame_clip=-1, train=True):
-        summary=self.summary
-
-        if train:
-            # # Input shape
-            # if frame_clip != -1:
-            #     xtrain = xtrain_raw.reshape((len(xtrain_raw),frame_clip, 100, 100, 1))
-            #     input_layer = Input((frame_clip, 100, 100, 1))
-            # else:
-            #     xtrain = xtrain_raw.reshape((len(xtrain_raw), 20, 100, 100, 1))
-            #     input_layer = Input((20, 100, 100, 1))
-            # Input shape
-            if frame_clip != -1:
-                input_layer = Input((frame_clip, 100, 100, 3))
-            else:
-                input_layer = Input((20, 100, 100, 3))
-
-            ## Convolutional layers 1
-            conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-            if frame_clip > 5:
-                conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
-            else:
-                conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
-
-            # Max pooling to obtain the most imformatic features
-            if frame_clip > 5:
-                pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
-            else:
-                pooling_layer1 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer2)
-
-            ## Convolutional layers 2
-            if frame_clip > 8:
-                conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
-            else:
-                conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
-            # When using less frames, we need to reduce kernal size to fit after previous convolutions
-            if frame_clip > 11:
-                conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
-            else:
-                conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
-
-            # Max pooling to obtain the most imformatic features
-            # When using less frames, we need to reduce kernal size to fit after previous convolutions
-            if frame_clip > 14:
-                pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
-            else:
-                pooling_layer2 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer4)
-
-            # Normalize and flatten before feeding it to fully connected classification stage
-            pooling_layer2 = BatchNormalization()(pooling_layer2)
-            flatten_layer = Flatten()(pooling_layer2)
-
-            # Add dropouts to avoid overfitting / perform regularization
-            dense_layer1 = Dense(units=512, activation='relu')(flatten_layer)
-            dense_layer1 = Dropout(0.4)(dense_layer1)
-            dense_layer2 = Dense(units=256, activation='relu')(dense_layer1)
-            dense_layer2 = Dropout(0.4)(dense_layer2)
-            output_layer = Dense(2, activation='softmax')(dense_layer2)
-
-            # Define the model with input layer and output layer
-            model = Model(inputs=input_layer, outputs=output_layer)
-
-            if summary:
-                print(model.summary())
-
-            model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.1, verbose=2)
-
-            # Save the model and history to disk
-            filename = constants.SAVED_MODELS + 'odin.sav'
-            pickle.dump(model, open(filename, 'wb'))
-
-            his_filename = constants.SAVED_MODELS + 'odin_history.sav'
-            pickle.dump(history, open(his_filename, 'wb'))
-        else:
-            odin_filepath = constants.SAVED_MODELS + 'odin.sav'
-            exists = os.path.isfile(odin_filepath)
-            if exists:
-                model = pickle.load(open(constants.SAVED_MODELS + 'odin.sav', 'rb'))
-                print('Odin is ready.')
-            else:
-                prin('No saved model detected!')
-
-        return model
-
-    """ Model 3 Basic 3DCNN"""
-    def horus(self, xtrain=[], ytrain=[], frame_clip=-1, train=True):
-        summary=self.summary
-
-        if train:
-            # # Input shape
-            # if frame_clip != -1:
-            #     xtrain = xtrain_raw.reshape((len(xtrain_raw),frame_clip, 100, 100, 1))
-            #     input_layer = Input((frame_clip, 100, 100, 1))
-            # else:
-            #     xtrain = xtrain_raw.reshape((len(xtrain_raw), 20, 100, 100, 1))
-            #     input_layer = Input((20, 100, 100, 1))
-
-            # Input shape
-            if frame_clip != -1:
-                input_layer = Input((frame_clip, 100, 100, 3))
-            else:
-                input_layer = Input((20, 100, 100, 3))
-
-            ## Convolutional layers 1
-            conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-            if frame_clip > 5:
-                conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
-            else:
-                conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
-
-            # Max pooling to obtain the most imformatic features
-            if frame_clip > 5:
-                pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
-            else:
-                pooling_layer1 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer2)
-
-            ## Convolutional layers 2
-            if frame_clip > 8:
-                conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
-            else:
-                conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
-            # When using less frames, we need to reduce kernal size to fit after previous convolutions
-            if frame_clip > 11:
-                conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
-            else:
-                conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
-
-            # Max pooling to obtain the most imformatic features
-            # When using less frames, we need to reduce kernal size to fit after previous convolutions
-            if frame_clip > 14:
-                pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
-            else:
-                pooling_layer2 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer4)
-
-            # Normalize and flatten before feeding it to fully connected classification stage
-            pooling_layer2 = BatchNormalization()(pooling_layer2)
-            flatten_layer = Flatten()(pooling_layer2)
-
-            # Add dropouts to avoid overfitting / perform regularization
-            dense_layer1 = Dense(units=256, activation='relu')(flatten_layer)
-            dense_layer1 = Dropout(0.4)(dense_layer1)
-            dense_layer2 = Dense(units=128, activation='relu')(dense_layer1)
-            dense_layer2 = Dropout(0.4)(dense_layer2)
-            output_layer = Dense(2, activation='softmax')(dense_layer2)
-
-            # Define the model with input layer and output layer
-            model = Model(inputs=input_layer, outputs=output_layer)
-
-            if summary:
-                print(model.summary())
-
-            model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.1, verbose=2)
-
-            # Save the model and history to disk
-            filename = constants.SAVED_MODELS + 'horus.sav'
-            pickle.dump(model, open(filename, 'wb'))
-
-            his_filename = constants.SAVED_MODELS + 'horus_history.sav'
-            pickle.dump(history, open(his_filename, 'wb'))
-        else:
-            horus_filepath = constants.SAVED_MODELS + 'horus.sav'
-            exists = os.path.isfile(horus_filepath)
-            if exists:
-                model = pickle.load(open(constants.SAVED_MODELS + 'horus.sav', 'rb'))
-                print('Horus is ready.')
-            else:
-                prin('No saved model detected!')
-
         return model
