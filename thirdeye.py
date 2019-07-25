@@ -48,13 +48,13 @@ class Thirdeye:
         model = networks.Network(summary=True)
 
         if self.network == 'providence':
-            self.model = model.load_network('providence', train_x, train_y, frame_clip=self.FRAME_CLIP, train=True)
+            self.model = model.load_network('providence', train_x, train_y, train=True)
 
         if self.network == 'odin':
-            self.model = model.load_network('odin', train_x, train_y, frame_clip=self.FRAME_CLIP, train=True)
+            self.model = model.load_network('odin', train_x, train_y, train=True)
 
         if self.network == 'horus':
-            self.model = model.load_network('horus', train_x, train_y, frame_clip=self.FRAME_CLIP, train=True)
+            self.model = model.load_network('horus', train_x, train_y, train=True)
 
     """ Load saved models """
     def load(self):
@@ -189,13 +189,16 @@ class Thirdeye:
 
         return np.array(list(data_frame['MVs'].values)), np.array(to_categorical(list(data_frame['Labels'])))
 
+    """ Switch networks """
     def set_network(self, network):
         self.network = network
         self.title = network.capitalize()
         self.load()
 
+    """ Set frame clip """
     def set_frame_clip(self, frame_clip):
         self.FRAME_CLIP = frame_clip
 
+    """ Set max for class """
     def set_max_for_class(self, max_for_class):
         self.MAX_FOR_CLASS = max_for_class

@@ -22,7 +22,7 @@ class Network:
             load_network(name)
 
     """ Load model given name """
-    def load_network(self, name, xtrain=[], ytrain=[], frame_clip=-1, train=False):
+    def load_network(self, name, xtrain=[], ytrain=[], train=False):
         summary=self.summary
 
         if name == 'odin':
@@ -37,38 +37,35 @@ class Network:
 
         if train:
             # Input shape
-            if frame_clip != -1:
-                input_layer = Input((frame_clip, 100, 100, 3))
-            else:
-                input_layer = Input((20, 100, 100, 3))
+            input_layer = Input(xtrain[0].shape)
 
             ## Convolutional layers 1
             conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-            if frame_clip > 5:
+            if xtrain[0].shape[0] > 5:
                 conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
             else:
                 conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
 
             # Max pooling to obtain the most imformatic features
-            if frame_clip > 5:
+            if xtrain[0].shape[0] > 5:
                 pooling_layer1 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer2)
             else:
                 pooling_layer1 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer2)
 
             ## Convolutional layers 2
-            if frame_clip > 8:
+            if xtrain[0].shape[0] > 8:
                 conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
             else:
                 conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
             # When using less frames, we need to reduce kernal size to fit after previous convolutions
-            if frame_clip > 11:
+            if xtrain[0].shape[0] > 11:
                 conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
             else:
                 conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
 
             # Max pooling to obtain the most imformatic features
             # When using less frames, we need to reduce kernal size to fit after previous convolutions
-            if frame_clip > 14:
+            if xtrain[0].shape[0] > 14:
                 pooling_layer2 = MaxPooling3D(pool_size=(2, 2, 2))(conv_layer4)
             else:
                 pooling_layer2 = MaxPooling3D(pool_size=(1, 2, 2))(conv_layer4)
