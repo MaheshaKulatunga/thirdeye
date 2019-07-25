@@ -1,6 +1,6 @@
 from keras.models import Model
 from keras.models import Sequential
-from keras.layers import Input, Dense, Flatten, Conv3D, MaxPooling3D, BatchNormalization, Dropout, Reshape, Concatenate, LeakyReLU, ZeroPadding3D
+from keras.layers import Input, Dense, Flatten, Conv3D, MaxPooling3D, BatchNormalization, Dropout, Reshape, Concatenate
 from keras.optimizers import Adam
 from keras.optimizers import Adadelta
 from keras.losses import categorical_crossentropy
@@ -15,6 +15,7 @@ import pickle
 import constants
 
 class Network:
+    """ Initialize Class """
     def __init__(self, summary=False, name=''):
         self.summary = summary
 

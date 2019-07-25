@@ -26,7 +26,7 @@ class Thirdeye:
         self.FRAME_CLIP = frame_clip
 
         if self.PRE_PROCESSING:
-            self.preprocess()
+            self.perform_preprocessing()
 
         if self.FORCE_TRAIN:
             self.train()
@@ -37,9 +37,10 @@ class Thirdeye:
             self.evaluate()
 
     """ Preprocess data """
-    def preprocess(self):
-        preprocessing.handle_train_files()
-        preprocessing.handle_test_files()
+    def perform_preprocessing(self):
+        pre_p = Preprocessor()
+        pre_p.preprocess(1)
+        pre_p.preprocess(2)
 
     """ Train data """
     def train(self):
@@ -88,7 +89,8 @@ class Thirdeye:
     """ Classify an unknown video """
     def classify(self):
         if len(os.listdir(constants.UNKNOWN_RAW)) > 0:
-            preprocessing.handle_unknown_files()
+            pre_p = Preprocessor()
+            pre_p.preprocess(3)
 
         classifier = classify.Classifier(self.model, constants.UNKNOWN_SEP, self.FRAME_CLIP)
         classifier.classify_videos()
