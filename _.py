@@ -237,3 +237,57 @@ if __name__ == "__main__":
         print('Evaluating model')
         odin_history = pickle.load(open(constants.SAVED_MODELS + 'odin_history.sav', 'rb'))
         evaluate.plot_accloss_graph(odin_history, 'Odin')
+ # input_movie = utilities.init_video(folder + file_name)
+#     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+#     mult_frame = []
+#     while True:
+#         # Grab a single frame of video
+#         ret, frame = input_movie.read()
+#         frame_number += 1
+#
+#         # Quit when the input video file ends
+#         if not ret:
+#             break
+#
+#         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+#         rgb_frame = frame[:, :, ::-1]
+#
+#         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+#
+#         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+#         for (x, y, w, h) in faces:
+#
+#             frame = frame[y:y+h,x:x+w]
+#
+#             try:
+#                 frame = cv2.resize(frame, (box_size, box_size), interpolation=cv2.INTER_LINEAR)
+#                 frame_list = frame_list + [frame]
+#
+#             except Exception as e:
+#                 print(str(e))
+#         count += 1
+#         mult_frame.append(frame_list)
+#
+#     # Write the resulting frames to the output video file
+#     for frame_list in mult_frame:
+#         if len(frame_list) == frames:
+#             output_movie = cv2.VideoWriter(output_folder + file_name, fourcc, length, (box_size, box_size))
+#
+#             for f in range(frames):
+#                 print("Writing frame {} / {}".format(f+1, length))
+#                 output_movie.write(frame_list[f])
+#         else:
+#             if len(frame_list) >= (frames * 0.75):
+#                 output_movie = cv2.VideoWriter(output_folder + file_name, fourcc, length, (box_size, box_size))
+#
+#                 print('Duplicating frames for video {}'.format(file_name))
+#                 frame_list = frame_list + [frame_list[0]] * (frames - len(frame_list))
+#                 for f in range(frames):
+#                     print("Writing frame {} / {}".format(f+1, length))
+#                     output_movie.write(frame_list[f])
+#             else:
+#                 print('Discarding invalid video {}'.format(file_name))
+#
+#         # All done!
+#         input_movie.release()
+#         cv2.destroyAllWindows()
