@@ -15,28 +15,25 @@ import json
 
 class Thirdeye:
     """ Initialize Class """
-    def __init__(self, pre_p=False, force_t=False, name='providence', evaluate=False, max_f_class=100000, frame_c=3):
+    def __init__(self, pre_p=False, force_t=False, network='providence', evaluate=False, max_for_class=100000, frame_clip=3):
         self.PRE_PROCESSING = pre_p
         self.FORCE_TRAIN = force_t
         self.EVALUATE = evaluate
         self.model = None
-        self.name = name
-        self.title = name.capitalize()
-        self.MAX_FOR_CLASS = max_f_class
-        self.FRAME_CLIP = frame_c
+        self.network = network
+        self.title = network.capitalize()
+        self.MAX_FOR_CLASS = max_for_class
+        self.FRAME_CLIP = frame_clip
 
         if self.PRE_PROCESSING:
             self.preprocess()
 
-        # """" TRAIN MODELS IF NOT ALREADY SAVED """""
-        filepath = constants.SAVED_MODELS + self.name + '.sav'
-        exists = os.path.isfile(filepath)
-        if not exists or self.FORCE_TRAIN:
+        if self.FORCE_TRAIN:
             self.train()
 
         self.load()
 
-        if self.EVALUATE:
+        if self.EVALUATE and (self.model is not None):
             self.evaluate()
 
     """ Preprocess data """
@@ -50,29 +47,29 @@ class Thirdeye:
         train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
         model = networks.Network(summary=True)
 
-        if self.name == 'providence':
+        if self.network == 'providence':
             self.model = model.providence(train_x, train_y, frame_clip=self.FRAME_CLIP)
 
-        if self.name == 'odin':
+        if self.network == 'odin':
             self.model = model.odin(train_x, train_y, frame_clip=self.FRAME_CLIP)
 
-        if self.name == 'horus':
+        if self.network == 'horus':
             self.model = model.horus(train_x, train_y, frame_clip=self.FRAME_CLIP)
 
     """ Load saved models """
     def load(self):
-        filepath = constants.SAVED_MODELS + self.name + '.sav'
+        filepath = constants.SAVED_MODELS + self.network + '.sav'
         exists = os.path.isfile(filepath)
         if exists:
             model = networks.Network(summary=True)
 
-            if self.name == 'providence':
+            if self.network == 'providence':
                 self.model = model.providence(train=False)
 
-            if self.name == 'odin':
+            if self.network == 'odin':
                 self.model = model.odin(train=False)
 
-            if self.name == 'horus':
+            if self.network == 'horus':
                 self.model = model.horus(train=False)
         else:
             print('No saved model!')
@@ -82,7 +79,7 @@ class Thirdeye:
     def evaluate(self):
         eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
 
-        history = pickle.load(open(constants.SAVED_MODELS + self.name + '_history.sav', 'rb'))
+        history = pickle.load(open(constants.SAVED_MODELS + self.network + '_history.sav', 'rb'))
         print('History of {} loaded'.format(self.title))
         eval = evaluate.Evaluator(self.model)
         eval.plot_accloss_graph(history, self.title)
@@ -96,7 +93,6 @@ class Thirdeye:
         classifier = classify.Classifier(self.model, constants.UNKNOWN_SEP, self.FRAME_CLIP)
         classifier.classify_videos()
         utilities.clear_folder(constants.UNKNOWN_SEP)
-
 
     """ Flip and duplicate videos to increase training set """
     def flip_duplicate(self, data):
@@ -192,3 +188,14 @@ class Thirdeye:
         df_data =[]
 
         return np.array(list(data_frame['MVs'].values)), np.array(to_categorical(list(data_frame['Labels'])))
+
+    def set_network(self, network):
+        self.network = network
+        self.title = network.capitalize()
+        self.load()
+
+    def set_frame_clip(self, frame_clip):
+        self.FRAME_CLIP = frame_clip
+
+    def set_max_for_class(self, max_for_class):
+        self.MAX_FOR_CLASS = max_for_class
