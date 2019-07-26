@@ -39,3 +39,9 @@ class Evaluator:
 
         accuracy = count/len(predictions)
         print(accuracy)
+
+    def set_model(self, model):
+        self.model = model
+
+    def get_model(self, model):
+        return model

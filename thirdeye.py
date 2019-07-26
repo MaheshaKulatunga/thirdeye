@@ -38,7 +38,7 @@ class Thirdeye:
 
     """ Preprocess data """
     def perform_preprocessing(self):
-        pre_p = Preprocessor()
+        pre_p = preprocessing.Preprocessor()
         pre_p.preprocess(1)
         pre_p.preprocess(2)
 
@@ -49,13 +49,16 @@ class Thirdeye:
         model = networks.Network(summary=True)
 
         if self.network == 'providence':
-            self.model = model.load_network('providence', train_x, train_y, train=True)
+            model.load_network('providence', train_x, train_y, train=True)
+            self.model = model.get_model()
 
         if self.network == 'odin':
-            self.model = model.load_network('odin', train_x, train_y, train=True)
+            model.load_network('odin', train_x, train_y, train=True)
+            self.model = model.get_model()
 
         if self.network == 'horus':
-            self.model = model.load_network('horus', train_x, train_y, train=True)
+            model.load_network('horus', train_x, train_y, train=True)
+            self.model = model.get_model()
 
     """ Load saved models """
     def load(self):
@@ -65,13 +68,16 @@ class Thirdeye:
             model = networks.Network(summary=True)
 
             if self.network == 'providence':
-                self.model = model.load_network('providence')
+                model.load_network('providence')
+                self.model = model.get_model()
 
             if self.network == 'odin':
-                self.model = model.load_network('odin')
+                model.load_network('odin')
+                self.model = model.get_model()
 
             if self.network == 'horus':
-                self.model = model.load_network('horus')
+                model.load_network('horus')
+                self.model = model.get_model()
         else:
             print('No saved model!')
 
@@ -89,12 +95,23 @@ class Thirdeye:
     """ Classify an unknown video """
     def classify(self):
         if len(os.listdir(constants.UNKNOWN_RAW)) > 0:
-            pre_p = Preprocessor()
+            pre_p = preprocessing.Preprocessor()
             pre_p.preprocess(3)
 
         classifier = classify.Classifier(self.model, constants.UNKNOWN_SEP, self.FRAME_CLIP)
-        classifier.classify_videos()
+        predictions = classifier.classify_videos()
+        for index, video in enumerate(predictions.keys()):
+            print('========== Video {} =========='.format(video))
+            print('Real: {}%, Deepfake: {}%'.format(round(predictions[video]['Real']*100, 2), round(predictions[video]['Deepfake']*100, 2)))
+            if predictions[video]['Real'] > predictions[video]['Deepfake']:
+                label = 'Real'
+            else:
+                label = 'Deepfake'
+
+            print('{}: {} \n'.format(video, label))
+
         utilities.clear_folder(constants.UNKNOWN_SEP)
+        return predictions
 
     """ Flip and duplicate videos to increase training set """
     def flip_duplicate(self, data):
@@ -204,3 +221,12 @@ class Thirdeye:
     """ Set max for class """
     def set_max_for_class(self, max_for_class):
         self.MAX_FOR_CLASS = max_for_class
+
+    def get_max_for_class(self):
+        return self.MAX_FOR_CLASS
+
+    def get_frame_clip(self):
+        return self.FRAME_CLIP
+
+    def get_network(self):
+        return {self.title: self.model}

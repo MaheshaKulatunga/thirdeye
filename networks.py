@@ -18,9 +18,10 @@ class Network:
     """ Initialize Class """
     def __init__(self, summary=False, name=''):
         self.summary = summary
+        self.model = None
 
         if len(name) > 0:
-            load_network(name)
+            self.load_network(name)
 
     """ Load model given name """
     def load_network(self, name, xtrain=[], ytrain=[], train=False):
@@ -105,4 +106,10 @@ class Network:
                 print('{} is ready.'.format(name.capitalize()))
             else:
                 prin('No saved model detected!')
-        return model
+        self.model = model
+
+    def set_model(self, name, xtrain=[], ytrain=[], train=False):
+        self.load_network(name, xtrain=[], ytrain=[], train=False)
+
+    def get_model(self):
+        return self.model

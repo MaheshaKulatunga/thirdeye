@@ -34,12 +34,31 @@ class Classifier:
 
             averaged_array.append([class_1_avg, class_2_avg])
 
-        pred_b = averaged_array
+        pred_b = {}
+
         # corr = 0
         for index, video in enumerate(self.unknown_videos):
-            if pred_b[index][0] > pred_b[index][1]:
-                label = 'Real'
-            else:
-                label = 'Deepfake'
+            pred_b.update({self.filenames[index]: {'Real': averaged_array[index][0], 'Deepfake': averaged_array[index][1]}})
 
-            print('{}: {}'.format(self.filenames[index], label))
+        return pred_b
+
+    def set_frames(self, frames):
+        self.unknown_clips = utilities.split_frames(self.unknown_videos, frames)
+
+    def set_folder(self, folder):
+        self.filenames = os.listdir(folder)
+        self.filenames.sort()
+        self.unknown_videos = utilities.retrieve_data(folder)
+        self.unknown_clips = utilities.split_frames(self.unknown_videos, self.frames)
+
+    def set_model(self, model):
+        self.model = model
+
+    def get_frames(self):
+        return self.frames
+
+    def get_folder(self):
+        return self.folder
+
+    def get_model(self):
+        return self.model
