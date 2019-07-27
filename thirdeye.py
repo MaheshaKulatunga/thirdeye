@@ -110,7 +110,7 @@ class Thirdeye:
 
             print('{}: {} \n'.format(video, label))
 
-        utilities.clear_folder(constants.UNKNOWN_SEP)
+        # utilities.clear_folder(constants.UNKNOWN_SEP)
         return predictions
 
     """ Flip and duplicate videos to increase training set """
