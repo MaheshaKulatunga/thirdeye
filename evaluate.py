@@ -4,9 +4,11 @@ import constants
 import time
 
 class Evaluator:
+    """ Initialize class """
     def __init__(self, model):
         self.model = model
 
+    """ Plot epoch loss graph """
     def plot_accloss_graph(self, histroy, name):
         plt.plot(histroy.history['acc'])
         plt.plot(histroy.history['val_acc'])
@@ -16,6 +18,7 @@ class Evaluator:
         plt.legend(['Training', 'Validation'], loc='upper left')
         plt.show()
 
+    """ Predict test data """
     def predict_test_data(self, x, y, name):
         # TODO Check size is correct and resize?
         start = time.time()
@@ -40,8 +43,10 @@ class Evaluator:
         accuracy = count/len(predictions)
         print(accuracy)
 
+    """ Set model """
     def set_model(self, model):
         self.model = model
 
+    """ Get model """
     def get_model(self, model):
         return model

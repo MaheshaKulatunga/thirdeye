@@ -23,7 +23,7 @@ class Network:
         if len(name) > 0:
             self.load_network(name)
 
-    """ Load model given name """
+    """ Load Model given name """
     def load_network(self, name, xtrain=[], ytrain=[], train=False):
         summary=self.summary
 
@@ -108,8 +108,10 @@ class Network:
                 prin('No saved model detected!')
         self.model = model
 
+    """ Set Model """
     def set_model(self, name, xtrain=[], ytrain=[], train=False):
         self.load_network(name, xtrain=[], ytrain=[], train=False)
 
+    """ Get Model """
     def get_model(self):
         return self.model

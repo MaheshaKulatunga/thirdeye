@@ -12,7 +12,7 @@ class Classifier:
         self.unknown_videos = utilities.retrieve_data(folder)
         self.unknown_clips = utilities.split_frames(self.unknown_videos, frames)
 
-
+    """ Classify unknown videos """
     def classify_videos(self):
         pred = self.model.predict([self.unknown_clips])
 
@@ -42,23 +42,29 @@ class Classifier:
 
         return pred_b
 
+    """ Set frames """
     def set_frames(self, frames):
         self.unknown_clips = utilities.split_frames(self.unknown_videos, frames)
 
+    """ Set folder """
     def set_folder(self, folder):
         self.filenames = os.listdir(folder)
         self.filenames.sort()
         self.unknown_videos = utilities.retrieve_data(folder)
         self.unknown_clips = utilities.split_frames(self.unknown_videos, self.frames)
 
+    """ Set model """
     def set_model(self, model):
         self.model = model
 
+    """ Get frames """
     def get_frames(self):
         return self.frames
 
+    """ Get folder """
     def get_folder(self):
         return self.folder
 
+    """ Get model """
     def get_model(self):
         return self.model

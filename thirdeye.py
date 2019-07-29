@@ -222,11 +222,14 @@ class Thirdeye:
     def set_max_for_class(self, max_for_class):
         self.MAX_FOR_CLASS = max_for_class
 
+    """ Get max for class """
     def get_max_for_class(self):
         return self.MAX_FOR_CLASS
 
+    """ Get frame clip """
     def get_frame_clip(self):
         return self.FRAME_CLIP
 
+    """ Get Network """
     def get_network(self):
         return {self.title: self.model}
