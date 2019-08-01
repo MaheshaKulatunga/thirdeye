@@ -13,6 +13,7 @@ class Evaluator:
     """ Initialize class """
     def __init__(self, model):
         self.model = model
+        print(model.summary())
 
     """ Plot epoch loss graph """
     def plot_accloss_graph(self, histroy, name):
