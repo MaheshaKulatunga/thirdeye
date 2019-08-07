@@ -2,7 +2,7 @@ import thirdeye
 
 if __name__ == "__main__":
     ti = thirdeye.Thirdeye()
-    ti.perform_preprocessing()
+    # ti.perform_preprocessing()
     ti.set_network('odin')
     # ti.train()
     ti.evaluate()

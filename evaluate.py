@@ -94,7 +94,7 @@ class Evaluator:
         start = time.time()
         predictions = self.model.predict(x)
         end = time.time()
-        print('{} completed the predictions in {}s'.format(name, round((end - start),2)))
+        print('{} completed the predictions in {}s ({}ps)'.format(name, round((end - start),2), round(len(predictions)/(end - start),2)))
         count = 0
         for pred in range(len(predictions)):
             if predictions[pred][0] > predictions[pred][1]:
