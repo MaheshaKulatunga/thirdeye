@@ -79,7 +79,7 @@ class Thirdeye:
                 model.load_network('horus')
                 self.model = model.get_model()
         else:
-            print('No saved model!')
+            print('No saved model! Please use the train function to train one.')
 
     """ Evaluate models available with seperate data """
     def evaluate(self):

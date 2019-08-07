@@ -9,6 +9,7 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 import utilities
 import constants
 import json
+import csv
 
 class Preprocessor:
 
@@ -19,11 +20,11 @@ class Preprocessor:
     """ Carry out preprocessing """
     def preprocess(self, split):
         if split == 1:
-            self.handle_train_files()
+            self.handle_train_files(1)
         elif split == 2:
-            self.handle_test_files()
+            self.handle_test_files(2)
         else:
-            self.handle_unknown_files()
+            self.handle_unknown_files(3)
 
     """ Get the largest face in a clip to ensur entire face is always visible after cropping """
     def get_largest_face_size(self, video):
@@ -58,9 +59,23 @@ class Preprocessor:
         return largest_face_width_i, largest_face_height_i
 
     """ Split raw videos into a given number of frames """
-    def split_raw_videos(self, clip_size, file_path, fps_path, output_path):
+    def split_raw_videos(self, clip_size, file_path, fps_path, output_path, split):
+        raw_file_list = os.listdir(file_path)
+        # Filter only new Files
+        old_files = []
+        old_files_path = '{}processed_files_{}.csv'.format(constants.DATA, split)
+        exists = os.path.isfile(old_files_path)
+        if exists:
+            with open(old_files_path, 'r') as f:
+                reader = csv.reader(f)
+                for i in reader:
+                    old_files.append(i[0])
+            new_files = [x for x in raw_file_list if x not in old_files]
+        else:
+            new_files = raw_file_list
+
         # Loop through files in folder
-        for index, filename in enumerate(os.listdir(file_path)):
+        for index, filename in enumerate(new_files):
             # If video file
             if filename.endswith(".mp4"):
                 video_filetype = "mp4"
@@ -82,10 +97,13 @@ class Preprocessor:
                             end = clip + clip_size
                             new = video.subclip(start, end)
                             new.write_videofile(output_video_path, audio=False, codec='libx264')
+                    # Store filename in folder
+                    with open(old_files_path, 'a') as f:
+                        f.write("%s\n" % filename)
                 else:
                     print('Warning missing file {}'.format(filename))
             else:
-                print('Warning: Incompatible file')
+                print('Warning: Incompatible file {}'.format(filename))
         print('File split Complete')
 
     """ Crop videos given a bounding box """
@@ -259,14 +277,16 @@ class Preprocessor:
                 cv2.destroyAllWindows()
 
     """ Preprocesses training files """
-    def handle_train_files(self):
+    def handle_train_files(self, split):
         print('Preprocessing training files')
         print("Looking for raw videos")
         if len(os.listdir(constants.RAW_DEEPFAKES)) == 1:
             print('No New Raw Videos Found!')
         else:
             start_time = time.time()
-            self.split_raw_videos(1, constants.RAW_DEEPFAKES, constants.TRAIN_FPS_DEEPFAKES , constants.TRAIN_DEEPFAKES)
+            subprocess.call("chmod +x {}rename.sh".format(constants.RAW_DEEPFAKES), shell=True)
+            subprocess.call("sh {}rename.sh {}".format(constants.RAW_DEEPFAKES, constants.RAW_DEEPFAKES), shell=True)
+            self.split_raw_videos(1, constants.RAW_DEEPFAKES, constants.TRAIN_FPS_DEEPFAKES , constants.TRAIN_DEEPFAKES, split)
             utilities.clear_folder(constants.TRAIN_FPS_DEEPFAKES)
             print("--- %s seconds ---" % (time.time() - start_time))
 
@@ -295,7 +315,9 @@ class Preprocessor:
             print('No Raw Videos Found!')
         else:
             start_time = time.time()
-            self.split_raw_videos(1, constants.RAW_REAL, constants.TRAIN_FPS_REAL , constants.TRAIN_REAL)
+            subprocess.call("chmod +x {}rename.sh".format(constants.RAW_REAL), shell=True)
+            subprocess.call("sh {}rename.sh {}".format(constants.RAW_REAL, constants.RAW_REAL), shell=True)
+            self.split_raw_videos(1, constants.RAW_REAL, constants.TRAIN_FPS_REAL , constants.TRAIN_REAL, split)
             utilities.clear_folder(constants.TRAIN_FPS_REAL)
             print("--- %s seconds ---" % (time.time() - start_time))
 
@@ -320,14 +342,16 @@ class Preprocessor:
             print("--- %s seconds ---" % (time.time() - start_time))
 
     """ Preprocesses testing files """
-    def handle_test_files(self):
+    def handle_test_files(self, split):
             print('Preprocessing videos for testing')
             print("Looking for raw videos")
             if len(os.listdir(constants.TEST_RAW_DEEPFAKES)) == 1:
                 print('No New Raw Videos Found!')
             else:
                 start_time = time.time()
-                self.split_raw_videos(1, constants.TEST_RAW_DEEPFAKES, constants.TEST_FPS_DEEPFAKES , constants.TEST_DEEPFAKES)
+                subprocess.call("chmod +x {}rename.sh".format(constants.TEST_RAW_DEEPFAKES), shell=True)
+                subprocess.call("sh {}rename.sh {}".format(constants.TEST_RAW_DEEPFAKES, constants.TEST_RAW_DEEPFAKES), shell=True)
+                self.split_raw_videos(1, constants.TEST_RAW_DEEPFAKES, constants.TEST_FPS_DEEPFAKES , constants.TEST_DEEPFAKES, split)
                 utilities.clear_folder(constants.TEST_FPS_DEEPFAKES)
 
                 print("--- %s seconds ---" % (time.time() - start_time))
@@ -358,7 +382,9 @@ class Preprocessor:
                 print('No Raw Videos Found!')
             else:
                 start_time = time.time()
-                self.split_raw_videos(1, constants.TEST_RAW_REAL, constants.TEST_FPS_REAL , constants.TEST_REAL)
+                subprocess.call("chmod +x {}rename.sh".format(constants.TEST_RAW_REAL), shell=True)
+                subprocess.call("sh {}rename.sh {}".format(constants.TEST_RAW_REAL, constants.TEST_RAW_REAL), shell=True)
+                self.split_raw_videos(1, constants.TEST_RAW_REAL, constants.TEST_FPS_REAL , constants.TEST_REAL, split)
                 utilities.clear_folder(constants.TEST_FPS_REAL)
 
                 print("--- %s seconds ---" % (time.time() - start_time))
@@ -384,14 +410,16 @@ class Preprocessor:
                 print("--- %s seconds ---" % (time.time() - start_time))
 
     """ Preprocesses unknown files """
-    def handle_unknown_files(self):
+    def handle_unknown_files(self, split):
         print('Preprocessing files to classify')
         print('Looking for raw videos')
         if len(os.listdir(constants.UNKNOWN_RAW)) == 0:
             print('No Raw Videos Found!')
         else:
             start_time = time.time()
-            self.split_raw_videos(1, constants.UNKNOWN_RAW, constants.UNKNOWN_FPS , constants.UNKNOWN_CLIPS)
+            subprocess.call("chmod +x {}rename.sh".format(constants.UNKNOWN_RAW), shell=True)
+            subprocess.call("sh {}rename.sh {}".format(constants.UNKNOWN_RAW, constants.UNKNOWN_RAW), shell=True)
+            self.split_raw_videos(1, constants.UNKNOWN_RAW, constants.UNKNOWN_FPS , constants.UNKNOWN_CLIPS, split)
             print('Clearing folders')
             utilities.clear_folder(constants.UNKNOWN_RAW)
             utilities.clear_folder(constants.UNKNOWN_FPS)
