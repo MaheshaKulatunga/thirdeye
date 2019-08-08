@@ -1,6 +1,8 @@
 import cv2
 import os
 import numpy as np
+import csv
+import ast
 
 """ Initialize video """
 def init_video(filepath):
@@ -58,9 +60,16 @@ def retrieve_data(folder, rgb=True, mv_type='mag'):
     else:
         print("Retriving motion vectors from file")
         for index, filename in enumerate(sorted_folder):
+            mvs = []
             with open(folder + filename, 'r') as f:
-                mv = json.load(f)
-            mv_arr = np.array(mv[mv_type], dtype=np.float32)
+                reader = csv.reader(f)
+                for i in reader:
+                    frame = []
+                    for row in list(i):
+                        row_l = ast.literal_eval(row)
+                        frame.append(row_l)
+                    mvs.append(np.array(frame, dtype=np.float32))
+            mv_arr = np.array(mvs)
             data.append(mv_arr)
 
     return data

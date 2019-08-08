@@ -260,20 +260,16 @@ class Preprocessor:
                 ang_obj = np.array(ang_obj)
                 mag_obj = np.array(mag_obj)
 
-                motion_obj = {'mag': mag_obj.tolist(), 'ang': ang_obj.tolist()}
+                mag = mag_obj.tolist()
+                # ang = ang_obj.tolist()
 
                 # Write the resulting frames to the output video file
                 if len(frame_list) == (frames-1):
-                    # output_movie = cv2.VideoWriter(output_folder + filename, fourcc, length, (100, 100))
-                    # for f in range(frames-1):
-                    #     print("Writing frame {} / {}".format(f + 1, length))
-                    #     output_movie.write(frame_list[f])
-
                     print("Writing vectors for {}".format(filename))
-                    with open(output_folder + filename + '.json', 'w') as outfile:
-                        json.dump(motion_obj, outfile)
-
-
+                    with open(output_folder + filename + '.csv', "w+") as outfile:
+                        writer = csv.writer(outfile, delimiter=',')
+                        for f in mag:
+                            writer.writerow(f)
                 else:
                     print('Discarding invalid video {}'.format(filename))
 
@@ -353,77 +349,77 @@ class Preprocessor:
 
     """ Preprocesses testing files """
     def handle_test_files(self, split):
-            print('Preprocessing videos for testing')
-            print("Looking for raw videos")
-            if len(os.listdir(constants.TEST_RAW_DEEPFAKES)) == 1:
-                print('No New Raw Videos Found!')
-            else:
-                start_time = time.time()
-                subprocess.call("chmod +x {}rename.sh".format(constants.TEST_RAW_DEEPFAKES), shell=True)
-                subprocess.call("sh {}rename.sh {}".format(constants.TEST_RAW_DEEPFAKES, constants.TEST_RAW_DEEPFAKES), shell=True)
-                self.split_raw_videos(1, constants.TEST_RAW_DEEPFAKES, constants.TEST_FPS_DEEPFAKES , constants.TEST_DEEPFAKES, split)
-                utilities.clear_folder(constants.TEST_FPS_DEEPFAKES)
+        print('Preprocessing videos for testing')
+        print("Looking for raw videos")
+        if len(os.listdir(constants.TEST_RAW_DEEPFAKES)) == 1:
+            print('No New Raw Videos Found!')
+        else:
+            start_time = time.time()
+            subprocess.call("chmod +x {}rename.sh".format(constants.TEST_RAW_DEEPFAKES), shell=True)
+            subprocess.call("sh {}rename.sh {}".format(constants.TEST_RAW_DEEPFAKES, constants.TEST_RAW_DEEPFAKES), shell=True)
+            self.split_raw_videos(1, constants.TEST_RAW_DEEPFAKES, constants.TEST_FPS_DEEPFAKES , constants.TEST_DEEPFAKES, split)
+            utilities.clear_folder(constants.TEST_FPS_DEEPFAKES)
 
-                time_taken = round(((time.time() - start_time) / 60.0), 2)
-                print("--- Completed in {} minutes ---".format(time_taken))
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
-            print('Looking for videos to crop')
-            if len(os.listdir(constants.TEST_DEEPFAKES)) == 2:
-                print('Can\'t find videos to crop!')
-            else:
-                utilities.get_frame_values(constants.TEST_DEEPFAKES)
-                utilities.get_frame_values(constants.TEST_FPS_DEEPFAKES)
+        print('Looking for videos to crop')
+        if len(os.listdir(constants.TEST_DEEPFAKES)) == 2:
+            print('Can\'t find videos to crop!')
+        else:
+            utilities.get_frame_values(constants.TEST_DEEPFAKES)
+            utilities.get_frame_values(constants.TEST_FPS_DEEPFAKES)
 
-                start_time = time.time()
-                self.crop_videos(constants.TEST_DEEPFAKES, constants.TEST_SEPARATED_DF_FACES, 20, 100, 20)
-                utilities.clear_folder(constants.TEST_DEEPFAKES)
+            start_time = time.time()
+            self.crop_videos(constants.TEST_DEEPFAKES, constants.TEST_SEPARATED_DF_FACES, 20, 100, 20)
+            utilities.clear_folder(constants.TEST_DEEPFAKES)
 
-                time_taken = round(((time.time() - start_time) / 60.0), 2)
-                print("--- Completed in {} minutes ---".format(time_taken))
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
-            print('Looking to extract motion vectors')
-            if len(os.listdir(constants.TEST_SEPARATED_DF_FACES)) == 0:
-                print('Can\'t find videos to extract motion vectors from!')
-            else:
-                start_time = time.time()
-                self.motion_vector_extraction(constants.TEST_SEPARATED_DF_FACES, constants.TEST_MV_DF_FACES, 20, 50)
-                time_taken = round(((time.time() - start_time) / 60.0), 2)
-                print("--- Completed in {} minutes ---".format(time_taken))
+        print('Looking to extract motion vectors')
+        if len(os.listdir(constants.TEST_SEPARATED_DF_FACES)) == 0:
+            print('Can\'t find videos to extract motion vectors from!')
+        else:
+            start_time = time.time()
+            self.motion_vector_extraction(constants.TEST_SEPARATED_DF_FACES, constants.TEST_MV_DF_FACES, 20, 50)
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
-            print("Looking for raw videos")
-            if len(os.listdir(constants.TEST_RAW_REAL)) == 1:
-                print('No Raw Videos Found!')
-            else:
-                start_time = time.time()
-                subprocess.call("chmod +x {}rename.sh".format(constants.TEST_RAW_REAL), shell=True)
-                subprocess.call("sh {}rename.sh {}".format(constants.TEST_RAW_REAL, constants.TEST_RAW_REAL), shell=True)
-                self.split_raw_videos(1, constants.TEST_RAW_REAL, constants.TEST_FPS_REAL , constants.TEST_REAL, split)
-                utilities.clear_folder(constants.TEST_FPS_REAL)
+        print("Looking for raw videos")
+        if len(os.listdir(constants.TEST_RAW_REAL)) == 1:
+            print('No Raw Videos Found!')
+        else:
+            start_time = time.time()
+            subprocess.call("chmod +x {}rename.sh".format(constants.TEST_RAW_REAL), shell=True)
+            subprocess.call("sh {}rename.sh {}".format(constants.TEST_RAW_REAL, constants.TEST_RAW_REAL), shell=True)
+            self.split_raw_videos(1, constants.TEST_RAW_REAL, constants.TEST_FPS_REAL , constants.TEST_REAL, split)
+            utilities.clear_folder(constants.TEST_FPS_REAL)
 
-                time_taken = round(((time.time() - start_time) / 60.0), 2)
-                print("--- Completed in {} minutes ---".format(time_taken))
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
-            print('Looking for videos to crop')
-            if len(os.listdir(constants.TEST_REAL)) == 2:
-                print('Can\'t find videos to crop!')
-            else:
-                utilities.get_frame_values(constants.TEST_REAL)
-                utilities.get_frame_values(constants.TEST_FPS_REAL)
+        print('Looking for videos to crop')
+        if len(os.listdir(constants.TEST_REAL)) == 2:
+            print('Can\'t find videos to crop!')
+        else:
+            utilities.get_frame_values(constants.TEST_REAL)
+            utilities.get_frame_values(constants.TEST_FPS_REAL)
 
-                start_time = time.time()
-                self.crop_videos(constants.TEST_REAL, constants.TEST_SEPARATED_REAL_FACES, 20, 100, 20)
-                utilities.clear_folder(constants.TEST_REAL)
-                time_taken = round(((time.time() - start_time) / 60.0), 2)
-                print("--- Completed in {} minutes ---".format(time_taken))
+            start_time = time.time()
+            self.crop_videos(constants.TEST_REAL, constants.TEST_SEPARATED_REAL_FACES, 20, 100, 20)
+            utilities.clear_folder(constants.TEST_REAL)
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
-            print('Looking to extract motion vectors')
-            if len(os.listdir(constants.TEST_SEPARATED_REAL_FACES)) == 0:
-                print('Can\'t find videos to extract motion vectors from!')
-            else:
-                start_time = time.time()
-                self.motion_vector_extraction(constants.TEST_SEPARATED_REAL_FACES, constants.TEST_MV_REAL_FACES, 20, 50)
-                time_taken = round(((time.time() - start_time) / 60.0), 2)
-                print("--- Completed in {} minutes ---".format(time_taken))
+        print('Looking to extract motion vectors')
+        if len(os.listdir(constants.TEST_SEPARATED_REAL_FACES)) == 0:
+            print('Can\'t find videos to extract motion vectors from!')
+        else:
+            start_time = time.time()
+            self.motion_vector_extraction(constants.TEST_SEPARATED_REAL_FACES, constants.TEST_MV_REAL_FACES, 20, 50)
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
     """ Preprocesses unknown files """
     def handle_unknown_files(self, split):

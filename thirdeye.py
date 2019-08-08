@@ -212,8 +212,8 @@ class Thirdeye:
         return np.array(list(data_frame['Videos'].values)), np.array(to_categorical(list(data_frame['Labels'])))
 
     """ Prepare training mc data ----------------------- DEPRECIATED -----------------------------"""
-    def prepare_mv_input(self, total_data=1000, frame_clip=-1, rgb=True):
-        df_data = utilities.retrieve_data(constants.TRAIN_MV_DF_FACES, rgb=rgb)
+    def prepare_mv_input(self, total_data=1000, frame_clip=-1):
+        df_data = utilities.retrieve_data(constants.TRAIN_MV_DF_FACES, rgb=False)
 
         # # Split further?
         if frame_clip != -1:
@@ -222,7 +222,7 @@ class Thirdeye:
         df_labels = [1] * len(df_data)
         print('Found {} Deepfake MVs'.format(len(df_data)))
 
-        real_data = utilities.retrieve_data(constants.TRAIN_MV_REAL_FACES, rgb=rgb)
+        real_data = utilities.retrieve_data(constants.TRAIN_MV_REAL_FACES, rgb=False)
         # Split further?
         if frame_clip != -1:
             real_data = utilities.split_frames(real_data, frame_clip)
