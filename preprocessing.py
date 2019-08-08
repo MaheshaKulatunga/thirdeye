@@ -19,12 +19,15 @@ class Preprocessor:
 
     """ Carry out preprocessing """
     def preprocess(self, split):
-        if split == 1:
-            self.handle_train_files(1)
-        elif split == 2:
-            self.handle_test_files(2)
-        else:
-            self.handle_unknown_files(3)
+        try:
+            if split == 1:
+                self.handle_train_files(1)
+            elif split == 2:
+                self.handle_test_files(2)
+            else:
+                self.handle_unknown_files(3)
+        except:
+            print("Oops!",sys.exc_info()[0],"occured.")
 
     """ Get the largest face in a clip to ensur entire face is always visible after cropping """
     def get_largest_face_size(self, video):

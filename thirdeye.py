@@ -39,46 +39,51 @@ class Thirdeye:
     """ Preprocess data """
     def perform_preprocessing(self):
         pre_p = preprocessing.Preprocessor()
-        pre_p.preprocess(1)
-        pre_p.preprocess(2)
+        try:
+            pre_p.preprocess(1)
+            pre_p.preprocess(2)
+        except:
+            print("Oops!",sys.exc_info()[0],"occured.")
 
     """ Train data """
     def train(self):
-        print('Training {}'.format(self.title))
+        try:
+            print('Training {}'.format(self.title))
 
-        model = networks.Network(summary=True)
+            model = networks.Network(summary=True)
 
-        if self.network == 'providence':
-            train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+            if self.network == 'providence':
+                train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
 
-            if len(train_x) == 0 or len(train_y) == 0:
-                print('No training data!')
-                exit()
-            model.load_network('providence', train_x, train_y, train=True)
-            self.model = model.get_model()
+                if len(train_x) == 0 or len(train_y) == 0:
+                    print('No training data!')
+                    exit()
+                model.load_network('providence', train_x, train_y, train=True)
+                self.model = model.get_model()
 
-        elif self.network == 'odin':
-            train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+            elif self.network == 'odin':
+                train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
 
-            if len(train_x) == 0 or len(train_y) == 0:
-                print('No training data!')
-                exit()
-            model.load_network('odin', train_x, train_y, train=True)
-            self.model = model.get_model()
+                if len(train_x) == 0 or len(train_y) == 0:
+                    print('No training data!')
+                    exit()
+                model.load_network('odin', train_x, train_y, train=True)
+                self.model = model.get_model()
 
-        elif self.network == 'horus':
-            train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+            elif self.network == 'horus':
+                train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
 
-            if len(train_x) == 0 or len(train_y) == 0:
-                print('No training data!')
-                exit()
-            model.load_network('horus', train_x, train_y, train=True)
-            self.model = model.get_model()
+                if len(train_x) == 0 or len(train_y) == 0:
+                    print('No training data!')
+                    exit()
+                model.load_network('horus', train_x, train_y, train=True)
+                self.model = model.get_model()
 
-        else:
-            print('Invalid network {}, reverting to Default'.format(self.title))
-            self.set_network('providence')
-
+            else:
+                print('Invalid network {}, reverting to Default'.format(self.title))
+                self.set_network('providence')
+        except:
+            print("Oops!",sys.exc_info()[0],"occured.")
 
     """ Load saved models """
     def load(self):
@@ -104,14 +109,17 @@ class Thirdeye:
 
     """ Evaluate models available with seperate data """
     def evaluate(self):
-        eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+        try:
+            eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
 
-        history = pickle.load(open(constants.SAVED_MODELS + self.network + '_history.sav', 'rb'))
-        print('History of {} loaded'.format(self.title))
+            history = pickle.load(open(constants.SAVED_MODELS + self.network + '_history.sav', 'rb'))
+            print('History of {} loaded'.format(self.title))
 
-        eval = evaluate.Evaluator(self.model)
-        eval.plot_accloss_graph(history, self.title)
-        eval.predict_test_data(eval_x, eval_y, self.title)
+            eval = evaluate.Evaluator(self.model)
+            eval.plot_accloss_graph(history, self.title)
+            eval.predict_test_data(eval_x, eval_y, self.title)
+        except:
+            print("Oops!",sys.exc_info()[0],"occured.")
 
     """ Classify an unknown video """
     def classify(self):
@@ -233,7 +241,10 @@ class Thirdeye:
     def set_network(self, network):
         self.network = network
         self.title = network.capitalize()
-        self.load()
+        try:
+            self.load()
+        except:
+            print("Oops!",sys.exc_info()[0],"occured.")
 
     """ Set frame clip """
     def set_frame_clip(self, frame_clip):
