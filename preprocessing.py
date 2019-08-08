@@ -28,7 +28,7 @@ class Preprocessor:
             else:
                 self.handle_unknown_files(3)
         except:
-            print("Oops!",sys.exc_info()[0],"occured.")
+            print("Oops!",sys.exc_info()[0],"occured. Ensure files for preprocessing are valid")
 
     """ Get the largest face in a clip to ensur entire face is always visible after cropping """
     def get_largest_face_size(self, video):

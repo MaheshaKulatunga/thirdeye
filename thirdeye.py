@@ -44,7 +44,7 @@ class Thirdeye:
             pre_p.preprocess(1)
             pre_p.preprocess(2)
         except:
-            print("Oops!",sys.exc_info()[0],"occured.")
+            print("Oops!",sys.exc_info()[0],"occured. Ensure Test and Train files are valid")
 
     """ Train data """
     def train(self):
@@ -84,7 +84,7 @@ class Thirdeye:
                 print('Invalid network {}, reverting to Default'.format(self.title))
                 self.set_network('providence')
         except:
-            print("Oops!",sys.exc_info()[0],"occured.")
+            print("Oops!",sys.exc_info()[0],"occured while trying to train network.")
 
     """ Load saved models """
     def load(self):
@@ -113,6 +113,9 @@ class Thirdeye:
         try:
             eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
 
+            if len(eval_x) == 0 or len(eval_y) == 0:
+                print('Error: No testing files')
+
             history = pickle.load(open(constants.SAVED_MODELS + self.network + '_history.sav', 'rb'))
             print('History of {} loaded'.format(self.title))
 
@@ -120,7 +123,7 @@ class Thirdeye:
             eval.plot_accloss_graph(history, self.title)
             eval.predict_test_data(eval_x, eval_y, self.title)
         except:
-            print("Oops!",sys.exc_info()[0],"occured.")
+            print("Oops!",sys.exc_info()[0],"occured while trying to evaluate the network.")
 
     """ Classify an unknown video """
     def classify(self):
@@ -248,7 +251,7 @@ class Thirdeye:
         try:
             self.load()
         except:
-            print("Oops!",sys.exc_info()[0],"occured.")
+            print("Oops!",sys.exc_info()[0],"occured while trying to set the network.")
 
     """ Set frame clip """
     def set_frame_clip(self, frame_clip):
