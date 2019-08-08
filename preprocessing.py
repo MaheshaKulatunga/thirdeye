@@ -421,7 +421,6 @@ class Preprocessor:
             subprocess.call("sh {}rename.sh {}".format(constants.UNKNOWN_RAW, constants.UNKNOWN_RAW), shell=True)
             self.split_raw_videos(1, constants.UNKNOWN_RAW, constants.UNKNOWN_FPS , constants.UNKNOWN_CLIPS, split)
             print('Clearing folders')
-            utilities.clear_folder(constants.UNKNOWN_RAW)
             utilities.clear_folder(constants.UNKNOWN_FPS)
 
             print("--- %s seconds ---" % (time.time() - start_time))

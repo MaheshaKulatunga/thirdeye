@@ -30,8 +30,8 @@ class Thirdeye:
 
         if self.FORCE_TRAIN:
             self.train()
-
-        self.load()
+        else:
+            self.load()
 
         if self.EVALUATE and (self.model is not None):
             self.evaluate()
@@ -45,20 +45,40 @@ class Thirdeye:
     """ Train data """
     def train(self):
         print('Training {}'.format(self.title))
-        train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+
         model = networks.Network(summary=True)
 
         if self.network == 'providence':
+            train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+
+            if len(train_x) == 0 or len(train_y) == 0:
+                print('No training data!')
+                exit()
             model.load_network('providence', train_x, train_y, train=True)
             self.model = model.get_model()
 
-        if self.network == 'odin':
+        elif self.network == 'odin':
+            train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+
+            if len(train_x) == 0 or len(train_y) == 0:
+                print('No training data!')
+                exit()
             model.load_network('odin', train_x, train_y, train=True)
             self.model = model.get_model()
 
-        if self.network == 'horus':
+        elif self.network == 'horus':
+            train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+
+            if len(train_x) == 0 or len(train_y) == 0:
+                print('No training data!')
+                exit()
             model.load_network('horus', train_x, train_y, train=True)
             self.model = model.get_model()
+
+        else:
+            print('Invalid network {}, reverting to Default'.format(self.title))
+            self.set_network('providence')
+
 
     """ Load saved models """
     def load(self):
@@ -79,7 +99,8 @@ class Thirdeye:
                 model.load_network('horus')
                 self.model = model.get_model()
         else:
-            print('No saved model! Please use the train function to train one.')
+            print('No saved network {}! Attempting to train it.'.format(self.title))
+            self.train()
 
     """ Evaluate models available with seperate data """
     def evaluate(self):
@@ -175,7 +196,7 @@ class Thirdeye:
 
         return np.array(list(data_frame['Videos'].values)), np.array(to_categorical(list(data_frame['Labels'])))
 
-    """ Prepare training mc data """
+    """ Prepare training mc data ----------------------- DEPRECIATED -----------------------------"""
     def prepare_mv_input(self, total_data=1000, frame_clip=-1, rgb=True):
         df_data = utilities.retrieve_data(constants.TRAIN_MV_DF_FACES, rgb=rgb)
 
