@@ -211,7 +211,7 @@ class Thirdeye:
 
         return np.array(list(data_frame['Videos'].values)), np.array(to_categorical(list(data_frame['Labels'])))
 
-    """ Prepare training mc data ----------------------- DEPRECIATED -----------------------------"""
+    """ Prepare training mc data ----------------------- NO LONGER USED -----------------------------"""
     def prepare_mv_input(self, total_data=1000, frame_clip=-1):
         df_data = utilities.retrieve_data(constants.TRAIN_MV_DF_FACES, rgb=False)
 
