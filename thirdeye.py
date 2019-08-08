@@ -124,24 +124,27 @@ class Thirdeye:
 
     """ Classify an unknown video """
     def classify(self):
-        if len(os.listdir(constants.UNKNOWN_RAW)) > 0:
-            pre_p = preprocessing.Preprocessor()
-            pre_p.preprocess(3)
+        try:
+            if len(os.listdir(constants.UNKNOWN_RAW)) > 0:
+                pre_p = preprocessing.Preprocessor()
+                pre_p.preprocess(3)
 
-        classifier = classify.Classifier(self.model, constants.UNKNOWN_SEP, self.FRAME_CLIP)
-        predictions = classifier.classify_videos()
-        for index, video in enumerate(predictions.keys()):
-            print('========== Video {} =========='.format(video))
-            print('Real: {}%, Deepfake: {}%'.format(round(predictions[video]['Real']*100, 2), round(predictions[video]['Deepfake']*100, 2)))
-            if predictions[video]['Real'] > predictions[video]['Deepfake']:
-                label = 'Real'
-            else:
-                label = 'Deepfake'
+            classifier = classify.Classifier(self.model, constants.UNKNOWN_SEP, self.FRAME_CLIP)
+            predictions = classifier.classify_videos()
+            for index, video in enumerate(predictions.keys()):
+                print('========== Video {} =========='.format(video))
+                print('Real: {}%, Deepfake: {}%'.format(round(predictions[video]['Real']*100, 2), round(predictions[video]['Deepfake']*100, 2)))
+                if predictions[video]['Real'] > predictions[video]['Deepfake']:
+                    label = 'Real'
+                else:
+                    label = 'Deepfake'
 
-            print('{}: {} \n'.format(video, label))
+                print('{}: {} \n'.format(video, label))
 
-        # utilities.clear_folder(constants.UNKNOWN_SEP)
-        return predictions
+            # utilities.clear_folder(constants.UNKNOWN_SEP)
+            return predictions
+        except:
+            print("Oops!",sys.exc_info()[0],"occured.")
 
     """ Flip and duplicate videos to increase training set """
     def flip_duplicate(self, data):

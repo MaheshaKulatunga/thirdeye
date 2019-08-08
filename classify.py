@@ -2,6 +2,7 @@ import constants
 import utilities
 import pickle
 import os
+import sys
 
 class Classifier:
 
@@ -14,33 +15,40 @@ class Classifier:
 
     """ Classify unknown videos """
     def classify_videos(self):
-        pred = self.model.predict([self.unknown_clips])
+        try:
+            if len(self.unknown_clips) == 0:
+                print('Error: there are no clips to predict')
 
-        n_averaged_elements = 6
-        averaged_array = []
-        a = pred
-        for i in range(0, len(a), n_averaged_elements):
-            slice_from_index = i
-            slice_to_index = slice_from_index + n_averaged_elements
-            slice = a[slice_from_index:slice_to_index]
-            class_1_avg = 0
-            class_2_avg = 0
-            for val in slice:
-               class_1_avg += val[0]
-               class_2_avg += val[1]
+            pred = self.model.predict([self.unknown_clips])
 
-            class_1_avg = class_1_avg/ n_averaged_elements
-            class_2_avg = class_2_avg/ n_averaged_elements
+            n_averaged_elements = 6
+            averaged_array = []
+            a = pred
+            for i in range(0, len(a), n_averaged_elements):
+                slice_from_index = i
+                slice_to_index = slice_from_index + n_averaged_elements
+                slice = a[slice_from_index:slice_to_index]
+                class_1_avg = 0
+                class_2_avg = 0
+                for val in slice:
+                   class_1_avg += val[0]
+                   class_2_avg += val[1]
 
-            averaged_array.append([class_1_avg, class_2_avg])
+                class_1_avg = class_1_avg/ n_averaged_elements
+                class_2_avg = class_2_avg/ n_averaged_elements
 
-        pred_b = {}
+                averaged_array.append([class_1_avg, class_2_avg])
 
-        # corr = 0
-        for index, video in enumerate(self.unknown_videos):
-            pred_b.update({self.filenames[index]: {'Real': averaged_array[index][0], 'Deepfake': averaged_array[index][1]}})
+            pred_b = {}
 
-        return pred_b
+            # corr = 0
+            for index, video in enumerate(self.unknown_videos):
+                pred_b.update({self.filenames[index]: {'Real': averaged_array[index][0], 'Deepfake': averaged_array[index][1]}})
+
+            return pred_b
+        except:
+            print("Oops!",sys.exc_info()[0],"occured.")
+
 
     """ Set frames """
     def set_frames(self, frames):
