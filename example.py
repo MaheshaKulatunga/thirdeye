@@ -1,7 +1,7 @@
 import thirdeye
 
 if __name__ == "__main__":
-    ti = thirdeye.Thirdeye(network='www')
+    ti = thirdeye.Thirdeye()
     ti.set_network('odin')
     # ti.evaluate()
     ti.classify()
