@@ -292,7 +292,8 @@ class Preprocessor:
             subprocess.call("sh {}rename.sh {}".format(constants.RAW_DEEPFAKES, constants.RAW_DEEPFAKES), shell=True)
             self.split_raw_videos(1, constants.RAW_DEEPFAKES, constants.TRAIN_FPS_DEEPFAKES , constants.TRAIN_DEEPFAKES, split)
             utilities.clear_folder(constants.TRAIN_FPS_DEEPFAKES)
-            print("--- %s seconds ---" % (time.time() - start_time))
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
         print('Looking for videos to crop')
         if len(os.listdir(constants.TRAIN_DEEPFAKES)) == 2:
@@ -304,7 +305,8 @@ class Preprocessor:
             start_time = time.time()
             self.crop_videos(constants.TRAIN_DEEPFAKES, constants.TRAIN_SEPARATED_DF_FACES, 20, 100, 20)
             utilities.clear_folder(constants.TRAIN_DEEPFAKES)
-            print("--- %s seconds ---" % (time.time() - start_time))
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
         print('Looking to extract motion vectors')
         if len(os.listdir(constants.TRAIN_SEPARATED_DF_FACES)) == 0:
@@ -312,7 +314,8 @@ class Preprocessor:
         else:
             start_time = time.time()
             self.motion_vector_extraction(constants.TRAIN_SEPARATED_DF_FACES, constants.TRAIN_MV_DF_FACES, 20, 50)
-            print("--- %s seconds ---" % (time.time() - start_time))
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
         print("Looking for raw videos")
         if len(os.listdir(constants.RAW_REAL)) == 1:
@@ -323,7 +326,8 @@ class Preprocessor:
             subprocess.call("sh {}rename.sh {}".format(constants.RAW_REAL, constants.RAW_REAL), shell=True)
             self.split_raw_videos(1, constants.RAW_REAL, constants.TRAIN_FPS_REAL , constants.TRAIN_REAL, split)
             utilities.clear_folder(constants.TRAIN_FPS_REAL)
-            print("--- %s seconds ---" % (time.time() - start_time))
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
         print('Looking for videos to crop')
         if len(os.listdir(constants.TRAIN_REAL)) == 2:
@@ -335,7 +339,8 @@ class Preprocessor:
             start_time = time.time()
             self.crop_videos(constants.TRAIN_REAL, constants.TRAIN_SEPARATED_REAL_FACES, 20, 100, 20)
             utilities.clear_folder(constants.TRAIN_REAL)
-            print("--- %s seconds ---" % (time.time() - start_time))
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
         print('Looking to extract motion vectors')
         if len(os.listdir(constants.TRAIN_SEPARATED_REAL_FACES)) == 0:
@@ -343,7 +348,8 @@ class Preprocessor:
         else:
             start_time = time.time()
             self.motion_vector_extraction(constants.TRAIN_SEPARATED_REAL_FACES, constants.TRAIN_MV_REAL_FACES, 20, 50)
-            print("--- %s seconds ---" % (time.time() - start_time))
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
     """ Preprocesses testing files """
     def handle_test_files(self, split):
@@ -358,7 +364,8 @@ class Preprocessor:
                 self.split_raw_videos(1, constants.TEST_RAW_DEEPFAKES, constants.TEST_FPS_DEEPFAKES , constants.TEST_DEEPFAKES, split)
                 utilities.clear_folder(constants.TEST_FPS_DEEPFAKES)
 
-                print("--- %s seconds ---" % (time.time() - start_time))
+                time_taken = round(((time.time() - start_time) / 60.0), 2)
+                print("--- Completed in {} minutes ---".format(time_taken))
 
             print('Looking for videos to crop')
             if len(os.listdir(constants.TEST_DEEPFAKES)) == 2:
@@ -371,7 +378,8 @@ class Preprocessor:
                 self.crop_videos(constants.TEST_DEEPFAKES, constants.TEST_SEPARATED_DF_FACES, 20, 100, 20)
                 utilities.clear_folder(constants.TEST_DEEPFAKES)
 
-                print("--- %s seconds ---" % (time.time() - start_time))
+                time_taken = round(((time.time() - start_time) / 60.0), 2)
+                print("--- Completed in {} minutes ---".format(time_taken))
 
             print('Looking to extract motion vectors')
             if len(os.listdir(constants.TEST_SEPARATED_DF_FACES)) == 0:
@@ -379,7 +387,8 @@ class Preprocessor:
             else:
                 start_time = time.time()
                 self.motion_vector_extraction(constants.TEST_SEPARATED_DF_FACES, constants.TEST_MV_DF_FACES, 20, 50)
-                print("--- %s seconds ---" % (time.time() - start_time))
+                time_taken = round(((time.time() - start_time) / 60.0), 2)
+                print("--- Completed in {} minutes ---".format(time_taken))
 
             print("Looking for raw videos")
             if len(os.listdir(constants.TEST_RAW_REAL)) == 1:
@@ -391,7 +400,8 @@ class Preprocessor:
                 self.split_raw_videos(1, constants.TEST_RAW_REAL, constants.TEST_FPS_REAL , constants.TEST_REAL, split)
                 utilities.clear_folder(constants.TEST_FPS_REAL)
 
-                print("--- %s seconds ---" % (time.time() - start_time))
+                time_taken = round(((time.time() - start_time) / 60.0), 2)
+                print("--- Completed in {} minutes ---".format(time_taken))
 
             print('Looking for videos to crop')
             if len(os.listdir(constants.TEST_REAL)) == 2:
@@ -403,7 +413,8 @@ class Preprocessor:
                 start_time = time.time()
                 self.crop_videos(constants.TEST_REAL, constants.TEST_SEPARATED_REAL_FACES, 20, 100, 20)
                 utilities.clear_folder(constants.TEST_REAL)
-                print("--- %s seconds ---" % (time.time() - start_time))
+                time_taken = round(((time.time() - start_time) / 60.0), 2)
+                print("--- Completed in {} minutes ---".format(time_taken))
 
             print('Looking to extract motion vectors')
             if len(os.listdir(constants.TEST_SEPARATED_REAL_FACES)) == 0:
@@ -411,7 +422,8 @@ class Preprocessor:
             else:
                 start_time = time.time()
                 self.motion_vector_extraction(constants.TEST_SEPARATED_REAL_FACES, constants.TEST_MV_REAL_FACES, 20, 50)
-                print("--- %s seconds ---" % (time.time() - start_time))
+                time_taken = round(((time.time() - start_time) / 60.0), 2)
+                print("--- Completed in {} minutes ---".format(time_taken))
 
     """ Preprocesses unknown files """
     def handle_unknown_files(self, split):
@@ -426,9 +438,10 @@ class Preprocessor:
             self.split_raw_videos(1, constants.UNKNOWN_RAW, constants.UNKNOWN_FPS , constants.UNKNOWN_CLIPS, split)
             print('Clearing folders')
             utilities.clear_folder(constants.UNKNOWN_FPS)
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
 
-            print("--- %s seconds ---" % (time.time() - start_time))
-            print('Looking for videos to crop')
+        print('Looking for videos to crop')
         if len(os.listdir(constants.UNKNOWN_CLIPS)) == 2:
             print('Can\'t find videos to crop!')
         else:
@@ -438,4 +451,5 @@ class Preprocessor:
             start_time = time.time()
             self.crop_videos(constants.UNKNOWN_CLIPS, constants.UNKNOWN_SEP, 20, 100, 20)
             utilities.clear_folder(constants.UNKNOWN_CLIPS)
-            print("--- %s seconds ---" % (time.time() - start_time))
+            time_taken = round(((time.time() - start_time) / 60.0), 2)
+            print("--- Completed in {} minutes ---".format(time_taken))
