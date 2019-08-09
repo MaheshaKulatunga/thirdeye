@@ -15,7 +15,17 @@ import json
 import sys
 
 class Thirdeye:
-    """ Initialize Class """
+    """
+    Initialize Class
+    -----------------------------------------------------------
+    Initilise Thirdeye system
+    pre_p: Bool to force preprocessing
+    force_t: Bool to force training of active model
+    network: name of model to make active
+    evaluate: Bool to evaluate active model
+    max_for_class: maximum samples per class for training
+    frame_clip: number of frames per sample
+    """
     def __init__(self, pre_p=False, force_t=False, network='providence', evaluate=False, max_for_class=100000, frame_clip=3):
         self.PRE_PROCESSING = pre_p
         self.FORCE_TRAIN = force_t
@@ -37,7 +47,11 @@ class Thirdeye:
         if self.EVALUATE and (self.model is not None):
             self.evaluate()
 
-    """ Preprocess data """
+    """
+    Preprocess data
+    -----------------------------------------------------------
+    Perform preprocessing on training and testing data
+    """
     def perform_preprocessing(self):
         pre_p = preprocessing.Preprocessor()
         try:
@@ -46,7 +60,11 @@ class Thirdeye:
         except:
             print("Oops!",sys.exc_info()[0],"occured. Ensure Test and Train files are valid")
 
-    """ Train data """
+    """
+    Train data
+    -----------------------------------------------------------
+    Train currently active model
+    """
     def train(self):
         try:
             print('Training {}'.format(self.title))
@@ -86,7 +104,11 @@ class Thirdeye:
         except:
             print("Oops!",sys.exc_info()[0],"occured while trying to train network.")
 
-    """ Load saved models """
+    """
+    Load saved models
+    -----------------------------------------------------------
+    Load saved active model
+    """
     def load(self):
         filepath = constants.SAVED_MODELS + self.network + '.sav'
         exists = os.path.isfile(filepath)
@@ -108,7 +130,10 @@ class Thirdeye:
             print('No saved network {}! Attempting to train it.'.format(self.title))
             self.train()
 
-    """ Evaluate models available with seperate data """
+    """
+    Evaluate models available with Testing data
+    -----------------------------------------------------------
+    """
     def evaluate(self):
         try:
             eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
@@ -125,7 +150,11 @@ class Thirdeye:
         except:
             print("Oops!",sys.exc_info()[0],"occured while trying to evaluate the network.")
 
-    """ Classify an unknown video """
+    """
+    Classify unknown videos
+    -----------------------------------------------------------
+    Returns classifications as dictionary
+    """
     def classify(self):
         try:
             if len(os.listdir(constants.UNKNOWN_RAW)) > 0:
@@ -149,7 +178,10 @@ class Thirdeye:
         except:
             print("Oops!",sys.exc_info()[0],"occured.")
 
-    """ Flip and duplicate videos to increase training set """
+    """
+    Flip and duplicate videos to increase training set
+    -----------------------------------------------------------
+    """
     def flip_duplicate(self, data):
         flipped_videos = []
         for video in data:
@@ -161,7 +193,10 @@ class Thirdeye:
 
         return flipped_videos
 
-    """ Prepare training img data """
+    """
+    Prepare training img data
+    -----------------------------------------------------------
+    """
     def prepare_rgb_input(self, total_data=1000, frame_clip=-1, test=False):
         if test:
             df_data = utilities.retrieve_data(constants.TEST_SEPARATED_DF_FACES)
@@ -211,7 +246,7 @@ class Thirdeye:
 
         return np.array(list(data_frame['Videos'].values)), np.array(to_categorical(list(data_frame['Labels'])))
 
-    """ Prepare training mc data ----------------------- NO LONGER USED -----------------------------"""
+    """ Prepare training MV data ----------------------- NO LONGER USED -----------------------------"""
     def prepare_mv_input(self, total_data=1000, frame_clip=-1):
         df_data = utilities.retrieve_data(constants.TRAIN_MV_DF_FACES, rgb=False)
 
@@ -244,7 +279,11 @@ class Thirdeye:
 
         return np.array(list(data_frame['MVs'].values)), np.array(to_categorical(list(data_frame['Labels'])))
 
-    """ Switch networks """
+    """
+    Switch networks
+    -----------------------------------------------------------
+    network: name of the network to switch to
+    """
     def set_network(self, network):
         self.network = network
         self.title = network.capitalize()
@@ -253,22 +292,40 @@ class Thirdeye:
         except:
             print("Oops!",sys.exc_info()[0],"occured while trying to set the network.")
 
-    """ Set frame clip """
+    """
+    Set frame clip
+    -----------------------------------------------------------
+    frame_clip: new frames per sample
+    """
     def set_frame_clip(self, frame_clip):
         self.FRAME_CLIP = frame_clip
 
-    """ Set max for class """
+    """
+    Set max for class
+    -----------------------------------------------------------
+    max_for_class: new maximum per sample
+    """
     def set_max_for_class(self, max_for_class):
         self.MAX_FOR_CLASS = max_for_class
 
-    """ Get max for class """
+    """
+    Get max for class
+    -----------------------------------------------------------
+    """
     def get_max_for_class(self):
         return self.MAX_FOR_CLASS
 
-    """ Get frame clip """
+    """
+    Get frame clip
+    -----------------------------------------------------------
+    """
     def get_frame_clip(self):
         return self.FRAME_CLIP
 
-    """ Get Network """
+    """
+    Get Network
+    -----------------------------------------------------------
+    Returns dictionary of Network name and Keras model object
+    """
     def get_network(self):
         return {self.title: self.model}

@@ -14,11 +14,20 @@ import sys
 
 class Preprocessor:
 
-    """ Initialize Class """
+    """
+    Initialize Class
+    -----------------------------------------------------------
+    Initialize processing class
+    """
     def __init__(self):
         pass
 
-    """ Carry out preprocessing """
+    """
+    Carry out preprocessing
+    -----------------------------------------------------------
+    Primary function to carry out all Preprocessing
+    split: 1 for training, 2 for testing and 3 for unknown splits
+    """
     def preprocess(self, split):
         try:
             if split == 1:
@@ -30,7 +39,11 @@ class Preprocessor:
         except:
             print("Oops!",sys.exc_info()[0],"occured. Ensure files for preprocessing are valid")
 
-    """ Get the largest face in a clip to ensur entire face is always visible after cropping """
+    """
+    Get the largest face in a clip to ensure entire face is always visible after cropping
+    -----------------------------------------------------------
+    video: CV2 video object to get largest face from
+    """
     def get_largest_face_size(self, video):
         largest_face_height_i = 0
         largest_face_width_i = 0
@@ -62,7 +75,16 @@ class Preprocessor:
             count += 1
         return largest_face_width_i, largest_face_height_i
 
-    """ Split raw videos into a given number of frames """
+    """
+    Split raw videos into a given number of frames
+    -----------------------------------------------------------
+    Split raw videos into fixed segments of fixed frame enumerate
+    clip size: size of each individual clip
+    file_path: path to raw Videos
+    fps_path: path to store fps standardised Videos
+    output_path: path to store fixed size clips
+    split: which data split is currently been processed (train, test, unknown)
+    """
     def split_raw_videos(self, clip_size, file_path, fps_path, output_path, split):
         raw_file_list = os.listdir(file_path)
         # Filter only new Files
@@ -110,7 +132,15 @@ class Preprocessor:
                 print('Warning: Incompatible file {}'.format(filename))
         print('File split Complete')
 
-    """ Crop videos given a bounding box """
+    """
+    Crop videos given a bounding box
+    -----------------------------------------------------------
+    file_path: path to clips
+    output_folder: folder to store cropped clips
+    box_bias: extra pixels around face
+    box_size: final size of cropped video
+    frames: number of frames with faces that are required for this to be a valid video
+    """
     def crop_videos(self, file_path, output_folder, box_bias, box_size, frames):
         # Loop through files in folder
         for index, filename in enumerate(os.listdir(file_path)):
@@ -118,7 +148,16 @@ class Preprocessor:
             if filename.endswith(".mp4") or filename.endswith(".avi"):
                 self.facial_extraction(file_path, filename, output_folder, box_bias, box_size, frames)
 
-    """ Detect and crop faces from clips """
+    """
+    Detect and crop faces from clips
+    -----------------------------------------------------------
+    folder: path to clips
+    file_name: video filename
+    output_folder: folder to store cropped clips
+    box_bias: extra pixels around face
+    box_size: final size of cropped video
+    frames: number of frames with faces that are required for this to be a valid video
+    """
     def facial_extraction(self, folder, file_name, output_folder, box_bias, box_size, frames):
         print('Dealing with video {}'.format(file_name))
         input_movie = utilities.init_video(folder + file_name)
@@ -206,7 +245,14 @@ class Preprocessor:
         input_movie.release()
         cv2.destroyAllWindows()
 
-    """ Extract motion vectors from clips """
+    """
+    Extract motion vectors from clips
+    -----------------------------------------------------------
+    input_folder: folder to cropped videos
+    output_folder: folder to store output csv files
+    frames: number of frames to be a valid video
+    box_size: size of clip
+    """
     def motion_vector_extraction(self, input_folder, output_folder, frames, box_size):
         # Loop through files in folder
         for index, filename in enumerate(os.listdir(input_folder)):
@@ -276,7 +322,11 @@ class Preprocessor:
                 input_movie.release()
                 cv2.destroyAllWindows()
 
-    """ Preprocesses training files """
+    """
+    Preprocesses training files
+    -----------------------------------------------------------
+    split: set to 1
+    """
     def handle_train_files(self, split):
         print('Preprocessing training files')
         print("Looking for raw videos")
@@ -347,7 +397,11 @@ class Preprocessor:
             time_taken = round(((time.time() - start_time) / 60.0), 2)
             print("--- Completed in {} minutes ---".format(time_taken))
 
-    """ Preprocesses testing files """
+    """
+    Preprocesses testing files
+    -----------------------------------------------------------
+    split: set to 2
+    """
     def handle_test_files(self, split):
         print('Preprocessing videos for testing')
         print("Looking for raw videos")
@@ -421,7 +475,11 @@ class Preprocessor:
             time_taken = round(((time.time() - start_time) / 60.0), 2)
             print("--- Completed in {} minutes ---".format(time_taken))
 
-    """ Preprocesses unknown files """
+    """
+    Preprocesses unknown files
+    -----------------------------------------------------------
+    split: set to 3
+    """
     def handle_unknown_files(self, split):
         print('Preprocessing files to classify')
         print('Looking for raw videos')

@@ -5,7 +5,13 @@ import os
 import sys
 
 class Classifier:
-
+    """
+    Initialise Class
+    -----------------------------------------------------------
+    model: Keras model object to be used for the classifcations
+    folder: Specifies the folder with the videos to be classified
+    frames: How many frames per sample for the network
+    """
     def __init__(self, model, folder, frames):
         self.model = model
         self.filenames = os.listdir(folder)
@@ -13,7 +19,12 @@ class Classifier:
         self.unknown_videos = utilities.retrieve_data(folder)
         self.unknown_clips = utilities.split_frames(self.unknown_videos, frames)
 
-    """ Classify unknown videos """
+    """
+    Classify unknown videos
+    -----------------------------------------------------------
+    Carries out the classifications once the class is Initialise and all the
+    parameters are set
+    """
     def classify_videos(self):
         try:
             if len(self.unknown_clips) == 0:
@@ -49,30 +60,56 @@ class Classifier:
         except:
             print("Oops!",sys.exc_info()[0],"occured.")
 
-
-    """ Set frames """
+    """
+    Set frames
+    -----------------------------------------------------------
+    Sets the frames per sample of the model
+    frames: number of frames per sample to switch to
+    """
     def set_frames(self, frames):
         self.unknown_clips = utilities.split_frames(self.unknown_videos, frames)
 
-    """ Set folder """
+    """
+    Set folder
+    -----------------------------------------------------------
+    Sets the folder to look for classified videos in
+    folder: new folder to set to
+    """
     def set_folder(self, folder):
         self.filenames = os.listdir(folder)
         self.filenames.sort()
         self.unknown_videos = utilities.retrieve_data(folder)
         self.unknown_clips = utilities.split_frames(self.unknown_videos, self.frames)
 
-    """ Set model """
+    """
+    Set model
+    -----------------------------------------------------------
+    Sets new Keras model object
+    model: new model object
+    """
     def set_model(self, model):
         self.model = model
 
-    """ Get frames """
+    """
+    Get frames
+    -----------------------------------------------------------
+    Returns the current frames per sample being used
+    """
     def get_frames(self):
         return self.frames
 
-    """ Get folder """
+    """
+    Get folder
+    -----------------------------------------------------------
+    Returns the current folder being looked into
+    """
     def get_folder(self):
         return self.folder
 
-    """ Get model """
+    """
+    Get model
+    -----------------------------------------------------------
+    Returns the current model being used
+    """
     def get_model(self):
         return self.model

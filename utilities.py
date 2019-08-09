@@ -4,12 +4,20 @@ import numpy as np
 import csv
 import ast
 
-""" Initialize video """
+"""
+Initialize video
+-----------------------------------------------------------
+Initialises a video as CV2 object
+"""
 def init_video(filepath):
     vid = cv2.VideoCapture(filepath)
     return vid
 
-""" Delete contents of a folder """
+"""
+Delete contents of a folder
+-----------------------------------------------------------
+folder: folder to delete
+"""
 def clear_folder(folder):
     for the_file in os.listdir(folder):
         file_path = os.path.join(folder, the_file)
@@ -22,7 +30,12 @@ def clear_folder(folder):
 
     print('{} cleared'.format(folder))
 
-""" Get number of frames in videos """
+"""
+Get number of frames in videos
+-----------------------------------------------------------
+Returns the number of frames in clips
+file_path: path to videos to count frames
+"""
 def get_frame_values(file_path):
     frame_rates = []
     for index, filename in enumerate(os.listdir(file_path)):
@@ -32,14 +45,23 @@ def get_frame_values(file_path):
             length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
             frame_rates = frame_rates + [length]
 
-""" Flip transformation on a frame """
+"""
+Flip transformation on a frame
+-----------------------------------------------------------
+img: frame to flip
+"""
 def flip_img(img):
     horizontal_img = img.copy()
     # flip img horizontally
     horizontal_img = cv2.flip( img, 0 )
     return horizontal_img
 
-""" Retrive data from folders"""
+"""
+Retrive data from folders
+-----------------------------------------------------------
+folder: folder with video files
+rgb: select between RGB and MV files
+"""
 def retrieve_data(folder, rgb=True, mv_type='mag'):
     data = []
     sorted_folder = os.listdir(folder)
@@ -74,7 +96,12 @@ def retrieve_data(folder, rgb=True, mv_type='mag'):
 
     return data
 
-""" Split videos by defined number of frames """
+"""
+Split videos by defined number of frames
+-----------------------------------------------------------
+data: video to split
+chunk: number of frames per split
+"""
 def split_frames(data, chunk):
     split_fs = []
 

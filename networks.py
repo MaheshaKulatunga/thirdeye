@@ -15,7 +15,12 @@ import pickle
 import constants
 
 class Network:
-    """ Initialize Class """
+    """
+    Initialize Class
+    -----------------------------------------------------------
+    summary: weather or not to print model summary when training or loading
+    name: name of the model to be loaded
+    """
     def __init__(self, summary=False, name=''):
         self.summary = summary
         self.model = None
@@ -23,7 +28,13 @@ class Network:
         if len(name) > 0:
             self.load_network(name)
 
-    """ Load Model given name """
+    """
+    Load Model given name
+    -----------------------------------------------------------
+    name: name of the model to be loaded
+    xtrain, ytrain: data to be used for training
+    train: bool to signify if the model is to be trained or loaded
+    """
     def load_network(self, name, xtrain=[], ytrain=[], train=False):
         summary=self.summary
 
@@ -108,10 +119,21 @@ class Network:
                 prin('No saved model detected!')
         self.model = model
 
-    """ Set Model """
+    """
+    Set Model
+    -----------------------------------------------------------
+    Change the current active model
+    name: name of the model to be loaded
+    xtrain, ytrain: data to be used for training
+    train: bool to signify if the model is to be trained or loaded
+    """
     def set_model(self, name, xtrain=[], ytrain=[], train=False):
         self.load_network(name, xtrain=[], ytrain=[], train=False)
 
-    """ Get Model """
+    """
+    Get Model
+    -----------------------------------------------------------
+    Returns the current active model object
+    """
     def get_model(self):
         return self.model

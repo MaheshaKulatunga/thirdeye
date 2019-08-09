@@ -10,12 +10,21 @@ import numpy as np
 from itertools import cycle
 
 class Evaluator:
-    """ Initialize class """
+    """
+    Initialize class
+    -----------------------------------------------------------
+    model: Keras object for the network to be evaluated
+    """
     def __init__(self, model):
         self.model = model
         print(model.summary())
 
-    """ Plot epoch loss graph """
+    """
+    Plot epoch loss graph
+    -----------------------------------------------------------
+    histroy: the history object of the model saved during Training
+    name: Name of the model being evaluated
+    """
     def plot_accloss_graph(self, histroy, name):
         plt.plot(histroy.history['acc'])
         plt.plot(histroy.history['val_acc'])
@@ -25,7 +34,12 @@ class Evaluator:
         plt.legend(['Training', 'Validation'], loc='upper left')
         plt.show()
 
-    """ Plot Confusion matrix """
+    """
+    Plot Confusion matrix
+    -----------------------------------------------------------
+    y_true: true labels
+    y_pred: predicted labels
+    """
     def plot_cm(self, y_true, y_pred):
         labels = ['Deepfake', 'Real']
         cm = confusion_matrix(y_true, y_pred, labels)
@@ -41,7 +55,12 @@ class Evaluator:
         plt.ylabel('True')
         plt.show()
 
-    """ Plot ROC Curve """
+    """
+    Plot ROC Curve
+    -----------------------------------------------------------
+    y_true: true labels
+    y_score: predicted probabilities
+    """
     def plot_roc(self, y_true, y_score):
         lw = 2
         n_classes = 2
@@ -83,7 +102,12 @@ class Evaluator:
         plt.legend(loc="lower right")
         plt.show()
 
-    """ Predict test data """
+    """
+    Predict test data
+    -----------------------------------------------------------
+    x, y: independent and dependent variables
+    name: Name of the model being evaluated
+    """
     def predict_test_data(self, x, y, name):
         # TODO Check size is correct and resize?
         y_true = []
@@ -122,10 +146,19 @@ class Evaluator:
         self.plot_roc(np.array(y_true_multi), np.array(y_score))
         print('Accuracy: {}%'.format(round((accuracy*100), 2)))
 
-    """ Set model """
+    """
+    Set model
+    -----------------------------------------------------------
+    Sets the model to be evaluated
+    model: New model Keras object
+    """
     def set_model(self, model):
         self.model = model
 
-    """ Get model """
-    def get_model(self, model):
-        return model
+    """
+    Get model
+    -----------------------------------------------------------
+    Returns model being evaluated
+    """
+    def get_model(self):
+        return self.model
