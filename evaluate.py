@@ -8,7 +8,9 @@ from sklearn.metrics import auc
 from scipy import interp
 import numpy as np
 from itertools import cycle
-
+"""
+The evaluate class performs all necessary evaluation procedures for a given network.
+"""
 class Evaluator:
     """
     Initialize class

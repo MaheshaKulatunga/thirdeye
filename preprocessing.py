@@ -11,7 +11,9 @@ import constants
 import json
 import csv
 import sys
-
+"""
+All preprocessing required for training, testing and classification is carried out by a preprocessing class.
+"""
 class Preprocessor:
 
     """

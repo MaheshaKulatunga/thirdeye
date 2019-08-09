@@ -3,7 +3,9 @@ import os
 import numpy as np
 import csv
 import ast
-
+"""
+Contains reusable code and constants that are used throughout the application.
+"""
 """
 Initialize video
 -----------------------------------------------------------

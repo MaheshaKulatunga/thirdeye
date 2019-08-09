@@ -13,7 +13,9 @@ import os
 from tensorflow.python.client import device_lib
 import pickle
 import constants
-
+"""
+The networks class is capable of returning any one of our trained networks, given a network name.
+"""
 class Network:
     """
     Initialize Class

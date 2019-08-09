@@ -1,5 +1,6 @@
-# Constants
-# File Paths
+"""
+Constants, i.e. the file-paths that point to the different folders to be easily altered.
+"""
 # Folder wth All data
 DATA = './Data/'
 

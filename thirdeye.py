@@ -13,7 +13,9 @@ import pickle
 from sklearn.utils import shuffle
 import json
 import sys
-
+"""
+Adaptively handles all aspects of the system by sending instructions to all other components
+"""
 class Thirdeye:
     """
     Initialize Class

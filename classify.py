@@ -3,7 +3,10 @@ import utilities
 import pickle
 import os
 import sys
-
+"""
+The classify class is designed to be used for an unknown video that must be classed as either deepfake or real;
+through Thirdeye using the currently active trained network.
+"""
 class Classifier:
     """
     Initialise Class
