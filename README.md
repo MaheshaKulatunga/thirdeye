@@ -1,9 +1,8 @@
 # thirdeye
-*An effort to ensure seeing remains believing*
+> *An effort to ensure seeing remains believing*
 
 ## Requirements
-Thirdeye requires python3.6 or later. Hardware requirements for thirdeye are more or less in-line with the requirements for TensorFlow.
-TensorFlow is tested and supported on the following 64-bit systems:
+Thirdeye requires python3.6 or later. Hardware requirements for thirdeye are more or less in-line with the requirements for [TensorFlow](https://www.tensorflow.org/install). TensorFlow is tested and supported on the following 64-bit systems:
 
 - Ubuntu 16.04 or later
 - Windows 7 or later
@@ -13,8 +12,11 @@ TensorFlow is tested and supported on the following 64-bit systems:
 In addition, around _____________ disk space is required, ____________ including the DFD dataset.
 
 ### Dependencies
+#### Python Version
+- 3.6  
+
 #### Software
-- [FFmpeg](https://ffmpeg.org/).
+- [FFmpeg](https://ffmpeg.org/)
 
 #### Python Packages
 - opencv_python==4.0.0.21
@@ -28,15 +30,34 @@ In addition, around _____________ disk space is required, ____________ including
 - numpy==1.16.1
 - scikit_learn==0.21.3
 
-
 ## Set up
-Once all the requirements are satisfied, 
+- Ensure all dependencies are satisfied.
+- Navigate to the thirdeye directory in the command line.  
+- Run the *example.py* file to run the default actions.
+'''
+python example.py
+'''
 
 ## How do I train a model?
-
+- Ensure training files are stored in the ''' ./Data/TRAIN/DF_RAW ''' and  ''' ./Data/TRAIN/REAL_RAW '''
+- Ensure testing files are stored in the ''' ./Data/TEST/DF_RAW ''' and  ''' ./Data/TEST/REAL_RAW '''
+- Import and create an instance of thirdeye
+''' import thirdeye'''
+''' t = thirdeye.Thirdeye() '''
+- Perform preprocessing on training files
+''' t.perform_preprocessing() '''
+- Set the network to any desired; choose from *providence*, *odin* and *horus*.
+''' t.set_network(<network>) '''
+- Initiate training
+''' t.train() '''
+- This can all be handled with a single command at system initialization
+''' t = thirdeye.Thirdeye(name=<network>, pre_p=True, force_t=True) '''
 For access to the DFD dataset please contact mahesha.kulatunga@gmail.com.
 
-## How do I pick a model?
-
-
 ## How do I classify unknown videos?
+- Ensure all unknown videos are stored in ''' ./Data/UNKNOWN/UNKNOWN_RAW '''
+- Import thirdeye and pick a network.
+''' import thirdeye '''
+''' t = thirdeye.Thirdeye(network=<network>) '''
+- Carry out the classification
+''' t.classify() '''
