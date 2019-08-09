@@ -34,30 +34,44 @@ In addition, around _____________ disk space is required, ____________ including
 - Ensure all dependencies are satisfied.
 - Navigate to the thirdeye directory in the command line.  
 - Run the *example.py* file to run the default actions.
-'''
+```
 python example.py
-'''
+```
 
-## How do I train a model?
-- Ensure training files are stored in the ''' ./Data/TRAIN/DF_RAW ''' and  ''' ./Data/TRAIN/REAL_RAW '''
-- Ensure testing files are stored in the ''' ./Data/TEST/DF_RAW ''' and  ''' ./Data/TEST/REAL_RAW '''
-- Import and create an instance of thirdeye
-''' import thirdeye'''
-''' t = thirdeye.Thirdeye() '''
-- Perform preprocessing on training files
-''' t.perform_preprocessing() '''
+## How do I train a network?
+- Ensure training files are stored in the ``` ./Data/TRAIN/DF_RAW ``` and  ``` ./Data/TRAIN/REAL_RAW ```
+- Ensure testing files are stored in the ``` ./Data/TEST/DF_RAW ``` and  ``` ./Data/TEST/REAL_RAW ```
+- Import and create an instance of thirdeye.
+```
+import thirdeye  
+t = thirdeye.Thirdeye()
+```
+- Perform preprocessing on training files.
+```
+t.perform_preprocessing()
+```
 - Set the network to any desired; choose from *providence*, *odin* and *horus*.
-''' t.set_network(<network>) '''
-- Initiate training
-''' t.train() '''
-- This can all be handled with a single command at system initialization
-''' t = thirdeye.Thirdeye(name=<network>, pre_p=True, force_t=True) '''
+```
+t.set_network(<network>)
+```
+- Initiate training.
+```
+t.train()
+```
+- This can all be handled with a single command at system initialization.
+```
+t = thirdeye.Thirdeye(name=<network>, pre_p=True, force_t=True)
+```
 For access to the DFD dataset please contact mahesha.kulatunga@gmail.com.
 
 ## How do I classify unknown videos?
-- Ensure all unknown videos are stored in ''' ./Data/UNKNOWN/UNKNOWN_RAW '''
+- Ensure all unknown videos are stored in ``` ./Data/UNKNOWN/UNKNOWN_RAW ```
 - Import thirdeye and pick a network.
-''' import thirdeye '''
-''' t = thirdeye.Thirdeye(network=<network>) '''
+```
+import thirdeye
+t = thirdeye.Thirdeye(network=<network>)
+```
 - Carry out the classification
-''' t.classify() '''
+```
+t.classify() 
+```
