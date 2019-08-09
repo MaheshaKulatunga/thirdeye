@@ -280,7 +280,7 @@ class Preprocessor:
     def handle_train_files(self, split):
         print('Preprocessing training files')
         print("Looking for raw videos")
-        if len(os.listdir(constants.RAW_DEEPFAKES)) == 1:
+        if len(os.listdir(constants.RAW_DEEPFAKES)) == 2:
             print('No New Raw Videos Found!')
         else:
             start_time = time.time()
@@ -292,7 +292,7 @@ class Preprocessor:
             print("--- Completed in {} minutes ---".format(time_taken))
 
         print('Looking for videos to crop')
-        if len(os.listdir(constants.TRAIN_DEEPFAKES)) == 2:
+        if len(os.listdir(constants.TRAIN_DEEPFAKES)) == 0:
             print('Can\'t find videos to crop!')
         else:
             utilities.get_frame_values(constants.TRAIN_DEEPFAKES)
@@ -314,7 +314,7 @@ class Preprocessor:
             print("--- Completed in {} minutes ---".format(time_taken))
 
         print("Looking for raw videos")
-        if len(os.listdir(constants.RAW_REAL)) == 1:
+        if len(os.listdir(constants.RAW_REAL)) == 2:
             print('No Raw Videos Found!')
         else:
             start_time = time.time()
@@ -326,7 +326,7 @@ class Preprocessor:
             print("--- Completed in {} minutes ---".format(time_taken))
 
         print('Looking for videos to crop')
-        if len(os.listdir(constants.TRAIN_REAL)) == 2:
+        if len(os.listdir(constants.TRAIN_REAL)) == 0:
             print('Can\'t find videos to crop!')
         else:
             utilities.get_frame_values(constants.TRAIN_REAL)
@@ -351,7 +351,7 @@ class Preprocessor:
     def handle_test_files(self, split):
         print('Preprocessing videos for testing')
         print("Looking for raw videos")
-        if len(os.listdir(constants.TEST_RAW_DEEPFAKES)) == 1:
+        if len(os.listdir(constants.TEST_RAW_DEEPFAKES)) == 2:
             print('No New Raw Videos Found!')
         else:
             start_time = time.time()
@@ -364,7 +364,7 @@ class Preprocessor:
             print("--- Completed in {} minutes ---".format(time_taken))
 
         print('Looking for videos to crop')
-        if len(os.listdir(constants.TEST_DEEPFAKES)) == 2:
+        if len(os.listdir(constants.TEST_DEEPFAKES)) == 0:
             print('Can\'t find videos to crop!')
         else:
             utilities.get_frame_values(constants.TEST_DEEPFAKES)
@@ -387,7 +387,7 @@ class Preprocessor:
             print("--- Completed in {} minutes ---".format(time_taken))
 
         print("Looking for raw videos")
-        if len(os.listdir(constants.TEST_RAW_REAL)) == 1:
+        if len(os.listdir(constants.TEST_RAW_REAL)) == 2:
             print('No Raw Videos Found!')
         else:
             start_time = time.time()
@@ -400,7 +400,7 @@ class Preprocessor:
             print("--- Completed in {} minutes ---".format(time_taken))
 
         print('Looking for videos to crop')
-        if len(os.listdir(constants.TEST_REAL)) == 2:
+        if len(os.listdir(constants.TEST_REAL)) == 0:
             print('Can\'t find videos to crop!')
         else:
             utilities.get_frame_values(constants.TEST_REAL)
@@ -425,7 +425,7 @@ class Preprocessor:
     def handle_unknown_files(self, split):
         print('Preprocessing files to classify')
         print('Looking for raw videos')
-        if len(os.listdir(constants.UNKNOWN_RAW)) == 0:
+        if len(os.listdir(constants.UNKNOWN_RAW)) == 2:
             print('No Raw Videos Found!')
         else:
             start_time = time.time()
@@ -438,7 +438,7 @@ class Preprocessor:
             print("--- Completed in {} minutes ---".format(time_taken))
 
         print('Looking for videos to crop')
-        if len(os.listdir(constants.UNKNOWN_CLIPS)) == 2:
+        if len(os.listdir(constants.UNKNOWN_CLIPS)) == 0:
             print('Can\'t find videos to crop!')
         else:
             utilities.get_frame_values(constants.UNKNOWN_CLIPS)
