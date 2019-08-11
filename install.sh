@@ -1,0 +1,10 @@
+python3.6 -m pip install opencv_python
+python3.6 -m pip install moviepy
+python3.6 -m pip install face_recognition
+python3.6 -m pip install matplotlib
+python3.6 -m pip install pandas
+python3.6 -m pip install scipy
+python3.6 -m pip install Keras
+python3.6 -m pip install tensorflow
+python3.6 -m pip install numpy
+python3.6 -m pip install scikit_learn
