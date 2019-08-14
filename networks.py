@@ -41,25 +41,43 @@ class Network:
         summary=self.summary
 
         if name == 'odin':
+            filters1 = 8
+            filters2 = 16
+            conv2 = True
+            conv4 = False
+            nodes_1 = 32
+            nodes_2 = 16
+
+        elif name == 'horus':
+            filters1 = 16
+            filters2 = 16
+            conv2 = False
+            conv4 = False
+            nodes_1 = 32
+            nodes_2 = 16
+
+        else:
+            filters1 = 8
+            filters2 = 16
+            conv2 = True
+            conv4 = True
             nodes_1 = 512
             nodes_2 = 256
-        elif name == 'horus':
-            nodes_1 = 256
-            nodes_2 = 128
-        else:
-            nodes_1 = 2048
-            nodes_2 = 512
 
         if train:
             # Input shape
             input_layer = Input(xtrain[0].shape)
 
             ## Convolutional layers 1
-            conv_layer1 = Conv3D(filters=8, kernel_size=(3, 3, 3), activation='relu')(input_layer)
-            if xtrain[0].shape[0] > 5:
-                conv_layer2 = Conv3D(filters=16, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
+            conv_layer1 = Conv3D(filters=filters1, kernel_size=(3, 3, 3), activation='relu')(input_layer)
+            # Add 2nd convolution is needed
+            if conv2 == True:
+                if xtrain[0].shape[0] > 5:
+                    conv_layer2 = Conv3D(filters=filters2, kernel_size=(3, 3, 3), activation='relu')(conv_layer1)
+                else:
+                    conv_layer2 = Conv3D(filters=filters2, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
             else:
-                conv_layer2 = Conv3D(filters=16, kernel_size=(1, 3, 3), activation='relu')(conv_layer1)
+                conv_layer2 = conv_layer1
 
             # Max pooling to obtain the most imformatic features
             if xtrain[0].shape[0] > 5:
@@ -72,11 +90,16 @@ class Network:
                 conv_layer3 = Conv3D(filters=32, kernel_size=(3, 3, 3), activation='relu')(pooling_layer1)
             else:
                 conv_layer3 = Conv3D(filters=32, kernel_size=(1, 3, 3), activation='relu')(pooling_layer1)
-            # When using less frames, we need to reduce kernal size to fit after previous convolutions
-            if xtrain[0].shape[0] > 11:
-                conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
+
+            # Add 4th conv layer if needed
+            if conv4 == True:
+                # When using less frames, we need to reduce kernal size to fit after previous convolutions
+                if xtrain[0].shape[0] > 11:
+                    conv_layer4 = Conv3D(filters=64, kernel_size=(3, 3, 3), activation='relu')(conv_layer3)
+                else:
+                    conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
             else:
-                conv_layer4 = Conv3D(filters=64, kernel_size=(1, 3, 3), activation='relu')(conv_layer3)
+                conv_layer4 = conv_layer3
 
             # Max pooling to obtain the most imformatic features
             # When using less frames, we need to reduce kernal size to fit after previous convolutions
@@ -116,9 +139,12 @@ class Network:
             exists = os.path.isfile(providence_filepath)
             if exists:
                 model = pickle.load(open(constants.SAVED_MODELS + name + '.sav', 'rb'))
+                if summary:
+                    print(model.summary())
                 print('{} is ready.'.format(name.capitalize()))
             else:
                 prin('No saved model detected!')
+
         self.model = model
 
     """

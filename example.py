@@ -1,10 +1,11 @@
 import thirdeye
 
 if __name__ == "__main__":
-    ti = thirdeye.Thirdeye()
-    ti.set_network('odin')
-    ti.evaluate()
-    ti.classify()
+    ti = thirdeye.Thirdeye(force_t=True, network='odin')
+    # ti.set_network('horus')
+
+    # ti.evaluate()
+    # ti.classify()
     #
     # ti.set_network('horus')
     # ti.train()
