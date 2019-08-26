@@ -231,6 +231,10 @@ class Thirdeye:
         else:
             df_data = utilities.retrieve_data(constants.TRAIN_SEPARATED_DF_FACES)
 
+        if len(df_data) == 0:
+            print('Warning test data folder is empty, reverting to a 80/20 split for training and validation.')
+            return [], []
+
         # Split further?
         if frame_clip != -1:
             df_data = utilities.split_frames(df_data, frame_clip)

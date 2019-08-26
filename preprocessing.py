@@ -120,7 +120,7 @@ class Preprocessor:
                         clip_count = int(video.duration/clip_size)
                         # Split each clip and save
                         for clip in range(clip_count):
-                            output_video_path = '{}{}{}.{}'.format(output_path, index, clip, video_filetype) #TODO CONVERT HERE
+                            output_video_path = '{}{}{}{}.{}'.format(output_path, index, len(old_files), clip, video_filetype) #TODO CONVERT HERE
                             start = clip
                             end = clip + clip_size
                             new = video.subclip(start, end)
@@ -147,7 +147,7 @@ class Preprocessor:
         # Loop through files in folder
         for index, filename in enumerate(os.listdir(file_path)):
             # If video file
-            if filename.endswith(".mp4") or filename.endswith(".avi"):
+            if filename.endswith(".mp4"):
                 self.facial_extraction(file_path, filename, output_folder, box_bias, box_size, frames)
 
     """

@@ -150,7 +150,10 @@ class Network:
                 print(model.summary())
 
             model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_data=(xtest, ytest), verbose=2)
+            if len(xtest) > 0 and len(ytest) > 0:
+                history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_data=(xtest, ytest), verbose=2)
+            else:
+                history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
 
             # Save the model and history to disk
             filename = constants.SAVED_MODELS + name + '.sav'
