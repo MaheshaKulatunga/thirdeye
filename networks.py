@@ -1,6 +1,6 @@
 from keras.models import Model
 from keras.models import Sequential
-from keras.layers import Input, Dense, Flatten, Conv3D, MaxPooling3D, BatchNormalization, Dropout, Reshape, Concatenate
+from keras.layers import Input, Dense, Flatten, Conv3D, MaxPooling3D, BatchNormalization, Dropout, Reshape, Concatenate, LeakyReLU
 from keras.optimizers import Adam
 from keras.optimizers import Adadelta
 from keras.losses import categorical_crossentropy
@@ -37,16 +37,26 @@ class Network:
     xtrain, ytrain: data to be used for training
     train: bool to signify if the model is to be trained or loaded
     """
-    def load_network(self, name, xtrain=[], ytrain=[], train=False):
+    def load_network(self, name, xtrain=[], ytrain=[], xtest=[], ytest=[], train=False):
         summary=self.summary
 
-        if name == 'odin':
+        if name == 'odin_v1':
             filters1 = 8
             filters2 = 16
             conv2 = True
             conv4 = False
             nodes_1 = 32
             nodes_2 = 16
+            leaky = False
+
+        elif name == 'odin_v2':
+            filters1 = 8
+            filters2 = 16
+            conv2 = True
+            conv4 = False
+            nodes_1 = 32
+            nodes_2 = 16
+            leaky = True
 
         elif name == 'horus':
             filters1 = 16
@@ -55,14 +65,25 @@ class Network:
             conv4 = False
             nodes_1 = 32
             nodes_2 = 16
+            leaky = False
+
+        elif name == 'providence_v2':
+            filters1 = 8
+            filters2 = 16
+            conv2 = True
+            conv4 = True
+            nodes_1 = 256
+            nodes_2 = 128
+            leaky = False
 
         else:
             filters1 = 8
             filters2 = 16
             conv2 = True
             conv4 = True
-            nodes_1 = 512
-            nodes_2 = 256
+            nodes_1 = 2048
+            nodes_2 = 512
+            leaky = False
 
         if train:
             # Input shape
@@ -114,10 +135,13 @@ class Network:
 
             # Add dropouts to avoid overfitting / perform regularization
             dense_layer1 = Dense(units=nodes_1, activation='relu')(flatten_layer)
-            dense_layer1 = Dropout(0.4)(dense_layer1)
-            dense_layer2 = Dense(units=nodes_2, activation='relu')(dense_layer1)
-            dense_layer2 = Dropout(0.4)(dense_layer2)
-            output_layer = Dense(2, activation='softmax')(dense_layer2)
+            dense_layer2 = Dropout(0.4)(dense_layer1)
+            if leaky:
+                dense_layer3 = LeakyReLU(alpha=5)(dense_layer2)
+            else:
+                dense_layer3 = Dense(units=nodes_2, activation='relu')(dense_layer2)
+            dense_layer4 = Dropout(0.4)(dense_layer3)
+            output_layer = Dense(2, activation='softmax')(dense_layer4)
 
             # Define the model with input layer and output layer
             model = Model(inputs=input_layer, outputs=output_layer)
@@ -126,7 +150,7 @@ class Network:
                 print(model.summary())
 
             model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
-            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
+            history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_data=(xtest, ytest), verbose=2)
 
             # Save the model and history to disk
             filename = constants.SAVED_MODELS + name + '.sav'

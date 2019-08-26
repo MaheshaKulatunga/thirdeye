@@ -28,7 +28,7 @@ class Thirdeye:
     max_for_class: maximum samples per class for training
     frame_clip: number of frames per sample
     """
-    def __init__(self, pre_p=False, force_t=False, network='providence', evaluate=False, max_for_class=100000, frame_clip=3):
+    def __init__(self, pre_p=False, force_t=False, network='odin_v1', evaluate=False, max_for_class=100000, frame_clip=3):
         self.PRE_PROCESSING = pre_p
         self.FORCE_TRAIN = force_t
         self.EVALUATE = evaluate
@@ -73,36 +73,54 @@ class Thirdeye:
 
             model = networks.Network(summary=True)
 
-            if self.network == 'providence':
+            if self.network == 'providence_v1':
                 train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
-                    exit()
-                model.load_network('providence', train_x, train_y, train=True)
+                model.load_network('providence_v1', train_x, train_y, eval_x, eval_y, train=True)
                 self.model = model.get_model()
 
-            elif self.network == 'odin':
+            elif self.network == 'providence_v2':
                 train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
-                    exit()
-                model.load_network('odin', train_x, train_y, train=True)
+                model.load_network('providence_v2', train_x, train_y, eval_x, eval_y, train=True)
+                self.model = model.get_model()
+
+            elif self.network == 'odin_v1':
+                train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+
+                if len(train_x) == 0 or len(train_y) == 0:
+                    print('No training data!')
+                model.load_network('odin_v1', train_x, train_y, eval_x, eval_y, train=True)
+                self.model = model.get_model()
+
+            elif self.network == 'odin_v2':
+                train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+
+                if len(train_x) == 0 or len(train_y) == 0:
+                    print('No training data!')
+                model.load_network('odin_v2', train_x, train_y, eval_x, eval_y, train=True)
                 self.model = model.get_model()
 
             elif self.network == 'horus':
                 train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
+                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
-                    exit()
-                model.load_network('horus', train_x, train_y, train=True)
+                model.load_network('horus', train_x, train_y, eval_x, eval_y, train=True)
                 self.model = model.get_model()
 
             else:
                 print('Invalid network {}, reverting to Default'.format(self.title))
-                self.set_network('providence')
+                self.set_network('odin_v1')
         except:
             print("Oops!",sys.exc_info()[0],"occured while trying to train network.")
 
@@ -117,12 +135,20 @@ class Thirdeye:
         if exists:
             model = networks.Network(summary=True)
 
-            if self.network == 'providence':
-                model.load_network('providence')
+            if self.network == 'providence_v1':
+                model.load_network('providence_v1')
                 self.model = model.get_model()
 
-            if self.network == 'odin':
-                model.load_network('odin')
+            if self.network == 'providence_v2':
+                model.load_network('providence_v2')
+                self.model = model.get_model()
+
+            if self.network == 'odin_v1':
+                model.load_network('odin_v1')
+                self.model = model.get_model()
+
+            if self.network == 'odin_v2':
+                model.load_network('odin_v2')
                 self.model = model.get_model()
 
             if self.network == 'horus':
