@@ -1,7 +1,7 @@
 import thirdeye
 
 if __name__ == "__main__":
-    ti = thirdeye.Thirdeye(max_for_class=12800, force_t=True, network='providence_v1')
+    ti = thirdeye.Thirdeye(force_t=True, max_for_class=10000, network='providence_v1', pre_p=True)
     ti.set_network('providence_v2')
     ti.set_network('odin_v1')
     ti.set_network('odin_v2')

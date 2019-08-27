@@ -17,8 +17,9 @@ class Evaluator:
     -----------------------------------------------------------
     model: Keras object for the network to be evaluated
     """
-    def __init__(self, model):
+    def __init__(self, model, show=True):
         self.model = model
+        self.show = show
         print(model.summary())
 
     """
@@ -34,15 +35,18 @@ class Evaluator:
         plt.ylabel('Accuracy')
         plt.xlabel('Epoch')
         plt.legend(['Training', 'Validation'], loc='upper left')
-        plt.show()
+        plt.savefig('{}{}_aegraph.png'.format(constants.FIGURES, name))
+        if self.show:
+            plt.show()
 
     """
     Plot Confusion matrix
     -----------------------------------------------------------
     y_true: true labels
     y_pred: predicted labels
+    name: Name of the model being evaluated
     """
-    def plot_cm(self, y_true, y_pred):
+    def plot_cm(self, y_true, y_pred, name):
         labels = ['Deepfake', 'Real']
         cm = confusion_matrix(y_true, y_pred, labels)
         print(cm)
@@ -55,15 +59,19 @@ class Evaluator:
         ax.set_yticklabels([''] + labels)
         plt.xlabel('Predicted')
         plt.ylabel('True')
-        plt.show()
+        plt.savefig('{}{}_cm.png'.format(constants.FIGURES, name))
+
+        if self.show:
+            plt.show()
 
     """
     Plot ROC Curve
     -----------------------------------------------------------
     y_true: true labels
     y_score: predicted probabilities
+    name: Name of the model being evaluated
     """
-    def plot_roc(self, y_true, y_score):
+    def plot_roc(self, y_true, y_score, name):
         lw = 2
         n_classes = 2
         fpr = dict()
@@ -102,7 +110,9 @@ class Evaluator:
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
         plt.legend(loc="lower right")
-        plt.show()
+        plt.savefig('{}{}_roc.png'.format(constants.FIGURES, name))
+        if self.show:
+            plt.show()
 
     """
     Predict test data
@@ -144,8 +154,8 @@ class Evaluator:
                 count += 1
 
         accuracy = count/len(predictions)
-        self.plot_cm(y_true, y_pred)
-        self.plot_roc(np.array(y_true_multi), np.array(y_score))
+        self.plot_cm(y_true, y_pred, name)
+        self.plot_roc(np.array(y_true_multi), np.array(y_score), name)
         print('Accuracy: {}%'.format(round((accuracy*100), 2)))
 
     """
@@ -156,6 +166,15 @@ class Evaluator:
     """
     def set_model(self, model):
         self.model = model
+
+    """
+    Set show
+    -----------------------------------------------------------
+    Sets the figures to display in the GUI
+    show: boolean for showing figures
+    """
+    def set_show(self, show):
+        self.show = show
 
     """
     Get model

@@ -13,6 +13,8 @@ import pickle
 from sklearn.utils import shuffle
 import json
 import sys
+from sklearn.model_selection import train_test_split
+
 """
 Adaptively handles all aspects of the system by sending instructions to all other components
 """
@@ -75,48 +77,59 @@ class Thirdeye:
 
             if self.network == 'providence_v1':
                 train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+                # eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+                train_x, eval_x, train_y, eval_y = train_test_split(train_x, train_y, test_size=0.2, random_state=420)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
+
                 model.load_network('providence_v1', train_x, train_y, eval_x, eval_y, train=True)
                 self.model = model.get_model()
+                self.evaluate(eval_x=eval_x, eval_y=eval_y, show=False)
 
             elif self.network == 'providence_v2':
                 train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+                # eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+                train_x, eval_x, train_y, eval_y = train_test_split(train_x, train_y, test_size=0.2, random_state=420)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
                 model.load_network('providence_v2', train_x, train_y, eval_x, eval_y, train=True)
                 self.model = model.get_model()
+                self.evaluate(eval_x=eval_x, eval_y=eval_y, show=False)
 
             elif self.network == 'odin_v1':
                 train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+                # eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+                train_x, eval_x, train_y, eval_y = train_test_split(train_x, train_y, test_size=0.2, random_state=420)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
                 model.load_network('odin_v1', train_x, train_y, eval_x, eval_y, train=True)
                 self.model = model.get_model()
+                self.evaluate(eval_x=eval_x, eval_y=eval_y, show=False)
 
             elif self.network == 'odin_v2':
                 train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+                # eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+                train_x, eval_x, train_y, eval_y = train_test_split(train_x, train_y, test_size=0.2, random_state=420)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
                 model.load_network('odin_v2', train_x, train_y, eval_x, eval_y, train=True)
                 self.model = model.get_model()
+                self.evaluate(eval_x=eval_x, eval_y=eval_y, show=False)
 
             elif self.network == 'horus':
                 train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+                # eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+                train_x, eval_x, train_y, eval_y = train_test_split(train_x, train_y, test_size=0.2, random_state=420)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
                 model.load_network('horus', train_x, train_y, eval_x, eval_y, train=True)
                 self.model = model.get_model()
+                self.evaluate(eval_x=eval_x, eval_y=eval_y, show=False)
 
             else:
                 print('Invalid network {}, reverting to Default'.format(self.title))
@@ -161,10 +174,14 @@ class Thirdeye:
     """
     Evaluate models available with Testing data
     -----------------------------------------------------------
+    eval_x: Custom testing data to evaluate on; independent variable
+    eval_y: Custom testing data to evaluate on; dependent variable
+    show: boolean to control if the figures are shown in GUI
     """
-    def evaluate(self):
+    def evaluate(self, eval_x=[], eval_y=[], show=True):
         try:
-            eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
+            if len(eval_x) == 0 or len(eval_y) == 0:
+                eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
 
             if len(eval_x) == 0 or len(eval_y) == 0:
                 print('Error: No testing files')
@@ -172,7 +189,7 @@ class Thirdeye:
             history = pickle.load(open(constants.SAVED_MODELS + self.network + '_history.sav', 'rb'))
             print('History of {} loaded'.format(self.title))
 
-            eval = evaluate.Evaluator(self.model)
+            eval = evaluate.Evaluator(self.model, show=show)
             eval.plot_accloss_graph(history, self.title)
             eval.predict_test_data(eval_x, eval_y, self.title)
         except:
@@ -225,7 +242,7 @@ class Thirdeye:
     Prepare training img data
     -----------------------------------------------------------
     """
-    def prepare_rgb_input(self, total_data=1000, frame_clip=-1, test=False):
+    def prepare_rgb_input(self, total_data=1000, frame_clip=-1, test=False, flip=False):
         if test:
             df_data = utilities.retrieve_data(constants.TEST_SEPARATED_DF_FACES)
         else:
@@ -256,7 +273,7 @@ class Thirdeye:
         # Split further?
         if frame_clip != -1:
             real_data = utilities.split_frames(real_data, frame_clip)
-        if not test:
+        if not test and flip:
             # Flip and duplicate
             flipped_real = self.flip_duplicate(real_data)
             real_data = real_data + flipped_real
@@ -320,9 +337,13 @@ class Thirdeye:
         self.network = network
         self.title = network.capitalize()
         try:
-            self.load()
+            if self.FORCE_TRAIN:
+                print('Force train is True, training new network {}'.format(self.title))
+                self.train()
+            else:
+                self.load()
         except:
-            print("Oops!",sys.exc_info()[0],"occured while trying to set the network.")
+            print("Oops!",sys.exc_info()[0],"occured while trying to set the network. Maybe try forceing the network to retrain?")
 
     """
     Set frame clip

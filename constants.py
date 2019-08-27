@@ -3,7 +3,7 @@ Constants, i.e. the file-paths that point to the different folders to be easily 
 """
 # Folder wth All data
 DATA = './Data/'
-
+FIGURES = './Figures/'
 # Training folders
 RAW_DEEPFAKES = '/run/media/u1856817/KINGSTON/TRAIN/DF_RAW/'
 RAW_REAL = '/run/media/u1856817/KINGSTON/TRAIN/REAL_RAW/'
