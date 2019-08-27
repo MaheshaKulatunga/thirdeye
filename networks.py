@@ -35,6 +35,7 @@ class Network:
     -----------------------------------------------------------
     name: name of the model to be loaded
     xtrain, ytrain: data to be used for training
+    xtest, ytest: data to be used for testing
     train: bool to signify if the model is to be trained or loaded
     """
     def load_network(self, name, xtrain=[], ytrain=[], xtest=[], ytest=[], train=False):

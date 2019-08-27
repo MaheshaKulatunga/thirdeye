@@ -16,6 +16,8 @@ class Evaluator:
     Initialize class
     -----------------------------------------------------------
     model: Keras object for the network to be evaluated
+    show: boolean to choose if the evaluated graphs are displayed
+          on screen in addition being saved as pngs
     """
     def __init__(self, model, show=True):
         self.model = model

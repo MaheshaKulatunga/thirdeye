@@ -226,6 +226,7 @@ class Thirdeye:
     """
     Flip and duplicate videos to increase training set
     -----------------------------------------------------------
+    data: image data to be flipped
     """
     def flip_duplicate(self, data):
         flipped_videos = []
@@ -241,6 +242,10 @@ class Thirdeye:
     """
     Prepare training img data
     -----------------------------------------------------------
+    total_data: how much data can be retrieved in total
+    frame_clip: clip data into segments given this number of frames
+    test: boolean to let the function know if this is for test or training
+    flip: boolean to let the function know if it must carry our horizontal flip transformations
     """
     def prepare_rgb_input(self, total_data=1000, frame_clip=-1, test=False, flip=False):
         if test:
