@@ -261,7 +261,7 @@ class Thirdeye:
         if frame_clip != -1:
             df_data = utilities.split_frames(df_data, frame_clip)
 
-        if not test:
+        if not test and flip:
             # Flip and duplicate
             flipped_df = self.flip_duplicate(df_data)
             df_data = df_data + flipped_df
