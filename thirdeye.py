@@ -76,9 +76,7 @@ class Thirdeye:
             model = networks.Network(summary=True)
 
             if self.network == 'providence_v1':
-                train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                # eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
-                train_x, eval_x, train_y, eval_y = train_test_split(train_x, train_y, test_size=0.2, random_state=420)
+                train_x, eval_x, train_y, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
@@ -88,9 +86,7 @@ class Thirdeye:
                 self.evaluate(eval_x=eval_x, eval_y=eval_y, show=False)
 
             elif self.network == 'providence_v2':
-                train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                # eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
-                train_x, eval_x, train_y, eval_y = train_test_split(train_x, train_y, test_size=0.2, random_state=420)
+                train_x, eval_x, train_y, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
@@ -99,9 +95,7 @@ class Thirdeye:
                 self.evaluate(eval_x=eval_x, eval_y=eval_y, show=False)
 
             elif self.network == 'odin_v1':
-                train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                # eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
-                train_x, eval_x, train_y, eval_y = train_test_split(train_x, train_y, test_size=0.2, random_state=420)
+                train_x, eval_x, train_y, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
@@ -110,9 +104,7 @@ class Thirdeye:
                 self.evaluate(eval_x=eval_x, eval_y=eval_y, show=False)
 
             elif self.network == 'odin_v2':
-                train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                # eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
-                train_x, eval_x, train_y, eval_y = train_test_split(train_x, train_y, test_size=0.2, random_state=420)
+                train_x, eval_x, train_y, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
@@ -121,9 +113,7 @@ class Thirdeye:
                 self.evaluate(eval_x=eval_x, eval_y=eval_y, show=False)
 
             elif self.network == 'horus':
-                train_x, train_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
-                # eval_x, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP, test=True)
-                train_x, eval_x, train_y, eval_y = train_test_split(train_x, train_y, test_size=0.2, random_state=420)
+                train_x, eval_x, train_y, eval_y = self.prepare_rgb_input(self.MAX_FOR_CLASS, self.FRAME_CLIP)
 
                 if len(train_x) == 0 or len(train_y) == 0:
                     print('No training data!')
@@ -250,55 +240,107 @@ class Thirdeye:
     def prepare_rgb_input(self, total_data=1000, frame_clip=-1, test=False, flip=False):
         if test:
             df_data = utilities.retrieve_data(constants.TEST_SEPARATED_DF_FACES)
+
+            if len(df_data) == 0:
+                print('Warning test data folder is empty, reverting to a 80/20 split for training and validation.')
+                return [], []
+
+            # Split further?
+            if frame_clip != -1:
+                df_data = utilities.split_frames(df_data, frame_clip)
+
+            df_labels = [1] * len(df_data)
+            print('Found {} test Deepfakes'.format(len(df_data)))
+
+            real_data = utilities.retrieve_data(constants.TEST_SEPARATED_REAL_FACES)
+
+            # Split further?
+            if frame_clip != -1:
+                real_data = utilities.split_frames(real_data, frame_clip)
+
+            real_labels = [0] * len(real_data)
+            print('Found {} test Pristine Videos'.format(len(real_data)))
+
+            train_x = df_data + real_data
+            train_y = df_labels + real_labels
+            data = {'Videos': train_x, 'Labels':train_y}
+
+            # Create DataFrame to shuffle
+            data_frame = pd.DataFrame(data)
+            data_frame = shuffle(data_frame, random_state=42)
+
+            # Remove data from memory
+            real_data = []
+            df_data =[]
+
+            return np.array(list(data_frame['Videos'].values)), np.array(to_categorical(list(data_frame['Labels'])))
+
         else:
             df_data = utilities.retrieve_data(constants.TRAIN_SEPARATED_DF_FACES)
+            df_labels = [1] * len(df_data)
 
-        if len(df_data) == 0:
-            print('Warning test data folder is empty, reverting to a 80/20 split for training and validation.')
-            return [], []
-
-        # Split further?
-        if frame_clip != -1:
-            df_data = utilities.split_frames(df_data, frame_clip)
-
-        if not test and flip:
-            # Flip and duplicate
-            flipped_df = self.flip_duplicate(df_data)
-            df_data = df_data + flipped_df
-
-        df_labels = [1] * len(df_data)
-        print('Found {} Deepfakes'.format(len(df_data)))
-
-        if test:
-            real_data = utilities.retrieve_data(constants.TEST_SEPARATED_REAL_FACES)
-        else:
             real_data = utilities.retrieve_data(constants.TRAIN_SEPARATED_REAL_FACES)
+            real_labels = [0] * len(real_data)
+
+            train_x_df, eval_x_df, temp_train_y_df, temp_eval_y_df = train_test_split(df_data, df_labels, test_size=0.1, random_state=420)
+            train_x_real, eval_x_real, temp_train_y_real, temp_eval_y_real = train_test_split(real_data, real_labels, test_size=0.1, random_state=420)
+
+            # Split further?
+            if frame_clip != -1:
+                train_x_df = utilities.split_frames(train_x_df, frame_clip)
+                train_x_real = utilities.split_frames(train_x_real, frame_clip)
+
+                eval_x_df = utilities.split_frames(eval_x_df, frame_clip)
+                eval_x_real = utilities.split_frames(eval_x_real, frame_clip)
+
+            if flip:
+                # Flip and duplicate
+                train_x_df_flipped = utilities.split_frames(train_x_df, frame_clip)
+                train_x_df = train_x_df + train_x_df_flipped
+
+                train_x_real_flipped = utilities.split_frames(train_x_real, frame_clip)
+                train_x_real = train_x_real + train_x_real_flipped
+
+                eval_x_df_flipped = utilities.split_frames(eval_x_df, frame_clip)
+                eval_x_df = eval_x_df + eval_x_df_flipped
+
+                eval_x_real_flipped = utilities.split_frames(eval_x_real, frame_clip)
+                eval_x_real = eval_x_real + eval_x_real_flipped
+
+            print('Found {} training Deepfake Videos'.format(len(train_x_df)))
+            print('Found {} training Pristine Videos'.format(len(train_x_real)))
+            print('Found {} validation Deepfake Videos'.format(len(eval_x_df)))
+            print('Found {} validation Pristine Videos'.format(len(eval_x_real)))
 
 
-        # Split further?
-        if frame_clip != -1:
-            real_data = utilities.split_frames(real_data, frame_clip)
-        if not test and flip:
-            # Flip and duplicate
-            flipped_real = self.flip_duplicate(real_data)
-            real_data = real_data + flipped_real
+            train_x = train_x_df[:total_data] + train_x_real[:total_data]
 
-        real_labels = [0] * len(real_data)
-        print('Found {} Pristine Videos'.format(len(real_data)))
+            train_y_df = [1] * len(train_x_df)
+            train_y_real = [0] * len(train_x_real)
 
-        train_x = df_data[:total_data] + real_data[:total_data]
-        train_y = df_labels[:total_data] + real_labels[:total_data]
-        data = {'Videos': train_x, 'Labels':train_y}
+            train_y = train_y_df[:total_data] + train_y_real[:total_data]
 
-        # Create DataFrame to shuffle
-        data_frame = pd.DataFrame(data)
-        data_frame = shuffle(data_frame, random_state=42)
+            # Finalise Validation Data
+            eval_x = eval_x_df + eval_x_real
 
-        # Remove data from memory
-        real_data = []
-        df_data =[]
+            eval_y_df = [1] * len(eval_x_df)
+            eval_y_real = [0] * len(eval_x_real)
 
-        return np.array(list(data_frame['Videos'].values)), np.array(to_categorical(list(data_frame['Labels'])))
+            eval_y = eval_y_df + eval_y_real
+
+            train_data = {'Videos': train_x, 'Labels':train_y}
+            val_data = {'Videos': eval_x, 'Labels':eval_y}
+
+            # Create DataFrame to shuffle
+            train_data_data_frame = pd.DataFrame(train_data)
+            train_data_data_frame = shuffle(train_data_data_frame, random_state=42)
+
+            # Create DataFrame to shuffle
+            val_data_data_frame = pd.DataFrame(val_data)
+            val_data_data_frame = shuffle(val_data_data_frame, random_state=42)
+
+            return np.array(list(train_data_data_frame['Videos'].values)), np.array(list(val_data_data_frame['Videos'].values)), np.array(to_categorical(list(train_data_data_frame['Labels']))) , np.array(to_categorical(list(val_data_data_frame['Labels'])))
+
 
     """ Prepare training MV data ----------------------- NO LONGER USED -----------------------------"""
     def prepare_mv_input(self, total_data=1000, frame_clip=-1):
