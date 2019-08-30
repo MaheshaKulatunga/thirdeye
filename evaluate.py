@@ -40,7 +40,8 @@ class Evaluator:
         plt.savefig('{}{}_aegraph.png'.format(constants.FIGURES, name))
         if self.show:
             plt.show()
-
+        plt.clf()
+        
     """
     Plot Confusion matrix
     -----------------------------------------------------------
@@ -65,6 +66,7 @@ class Evaluator:
 
         if self.show:
             plt.show()
+        plt.clf()
 
     """
     Plot ROC Curve
@@ -115,6 +117,7 @@ class Evaluator:
         plt.savefig('{}{}_roc.png'.format(constants.FIGURES, name))
         if self.show:
             plt.show()
+        plt.clf()
 
     """
     Predict test data
