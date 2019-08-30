@@ -485,7 +485,7 @@ class Preprocessor:
     def handle_unknown_files(self, split):
         print('Preprocessing files to classify')
         print('Looking for raw videos')
-        if len(os.listdir(constants.UNKNOWN_RAW)) == 2:
+        if len(os.listdir(constants.UNKNOWN_RAW)) == 1:
             print('No Raw Videos Found!')
         else:
             start_time = time.time()

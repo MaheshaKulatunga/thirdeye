@@ -49,6 +49,7 @@ class Network:
             nodes_1 = 32
             nodes_2 = 16
             leaky = False
+            epochs = 10
 
         elif name == 'odin_v2':
             filters1 = 8
@@ -58,6 +59,7 @@ class Network:
             nodes_1 = 32
             nodes_2 = 16
             leaky = True
+            epochs = 30
 
         elif name == 'horus':
             filters1 = 16
@@ -67,6 +69,7 @@ class Network:
             nodes_1 = 32
             nodes_2 = 16
             leaky = False
+            epochs = 20
 
         elif name == 'providence_v2':
             filters1 = 8
@@ -76,6 +79,7 @@ class Network:
             nodes_1 = 256
             nodes_2 = 128
             leaky = False
+            epochs = 10
 
         else:
             filters1 = 8
@@ -85,6 +89,7 @@ class Network:
             nodes_1 = 2048
             nodes_2 = 512
             leaky = False
+            epochs = 10
 
         if train:
             # Input shape
@@ -152,9 +157,9 @@ class Network:
 
             model.compile(loss=categorical_crossentropy, optimizer=Adadelta(lr=0.1), metrics=['acc'])
             if len(xtest) > 0 and len(ytest) > 0:
-                history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_data=(xtest, ytest), verbose=2)
+                history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=epochs, validation_data=(xtest, ytest), verbose=2)
             else:
-                history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=10, validation_split=0.2, verbose=2)
+                history = model.fit(x=xtrain, y=ytrain, batch_size=32, epochs=epochs, validation_split=0.2, verbose=2)
 
             # Save the model and history to disk
             filename = constants.SAVED_MODELS + name + '.sav'

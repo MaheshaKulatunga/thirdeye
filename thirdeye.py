@@ -193,6 +193,7 @@ class Thirdeye:
     def classify(self):
         try:
             if len(os.listdir(constants.UNKNOWN_RAW)) > 0:
+                print('Preprocessing uknown videos')
                 pre_p = preprocessing.Preprocessor()
                 pre_p.preprocess(3)
 
