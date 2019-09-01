@@ -59,7 +59,7 @@ class Network:
             nodes_1 = 32
             nodes_2 = 16
             leaky = True
-            epochs = 30
+            epochs = 25
 
         elif name == 'horus':
             filters1 = 16

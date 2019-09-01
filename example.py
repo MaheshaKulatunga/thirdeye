@@ -5,7 +5,7 @@ if __name__ == "__main__":
     # ti.set_network('providence_v2')
     # ti.set_network('odin_v1')
     # ti.set_network('odin_v2')
-    ti.set_network('horus')
+    # ti.set_network('horus')
 
     # ti.evaluate()
     # ti.classify()
