@@ -1,5 +1,6 @@
 # thirdeye
 > *An effort to ensure seeing remains believing*
+
 Thirdeye is a comprehensive system for deepfake video detection developed by [Mahesha Kulatunga](http://maheshak.com/) for a MSc Data Analytics dissertation while at The University of Warwick. This code base handles the preprocessing, training and evaluating required for creating neural networks to be used for deepfake video classification. Included are 5 pre-trained 3D CNN architectures that can be used for unkown video classification. The following README outlines the basic functionality of the system.  
 
 ## Requirements
