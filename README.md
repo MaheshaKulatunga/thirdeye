@@ -5,7 +5,7 @@ Thirdeye is a comprehensive system for deepfake video detection developed by [Ma
 The following README outlines the basic functionality of the system.  
 
 ## Requirements
-Thirdeye requires python3.6 or later. Hardware requirements for thirdeye are more or less in-line with the requirements for [TensorFlow](https://www.tensorflow.org/install). TensorFlow is tested and supported on the following 64-bit systems:
+Thirdeye requires python3.6 or later. Hardware requirements for Thirdeye are more or less in-line with the requirements for [TensorFlow](https://www.tensorflow.org/install). TensorFlow is tested and supported on the following 64-bit systems:
 
 - Ubuntu 16.04 or later
 - Windows 7 or later
