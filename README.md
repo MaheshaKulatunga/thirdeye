@@ -1,5 +1,6 @@
 # thirdeye
 > *An effort to ensure seeing remains believing*
+Thirdeye is a comprehensive system for deepfake video detection developed by [Mahesha Kulatunga](http://maheshak.com/) for a MSc Data Analytics dissertation while at The University of Warwick. This code base handles the preprocessing, training and evaluating required for creating neural networks to be used for deepfake video classification. Included are 5 pre-trained 3D CNN architectures that can be used for unkown video classification. The following README outlines the basic functionality of the system.  
 
 ## Requirements
 Thirdeye requires python3.6 or later. Hardware requirements for thirdeye are more or less in-line with the requirements for [TensorFlow](https://www.tensorflow.org/install). TensorFlow is tested and supported on the following 64-bit systems:
@@ -33,7 +34,7 @@ In addition, around _____________ disk space is required, ____________ including
 ## Set up
 - Ensure all dependencies are satisfied.
 - Navigate to the thirdeye directory in the command line.  
-- Run the *example.py* file to run the default actions.
+- Run the *example.py* file to run an example classification of sample videos included in the data folder.
 ```
 python example.py
 ```
@@ -73,5 +74,5 @@ t = thirdeye.Thirdeye(network=<network>)
 ```
 - Carry out the classification
 ```
-t.classify() 
+t.classify()
 ```

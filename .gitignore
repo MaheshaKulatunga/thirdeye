@@ -111,5 +111,6 @@ Icon?
 
 # Data
 .DS_Store
-Saved_Models
-*.mp4
+Data/TRAIN/*/*.mp4
+Data/TRAIN/*/*/*.mp4
+Data/TEST/*/*.mp4
