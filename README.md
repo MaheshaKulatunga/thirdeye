@@ -1,7 +1,8 @@
 # thirdeye
 > *An effort to ensure seeing remains believing*
 
-Thirdeye is a comprehensive system for deepfake video detection developed by [Mahesha Kulatunga](http://maheshak.com/) for a MSc Data Analytics dissertation while at The University of Warwick. This code base handles the preprocessing, training and evaluating required for creating neural networks to be used for deepfake video classification. Included are 5 pre-trained 3D CNN architectures that can be used for unkown video classification. The following README outlines the basic functionality of the system.  
+Thirdeye is a comprehensive system for deepfake video detection developed by [Mahesha Kulatunga](http://maheshak.com/) for a MSc Data Analytics dissertation while at The University of Warwick. This code base handles the preprocessing, training and evaluating required when creating neural networks for video classification. Included are 5 pre-trained 3D CNN architectures that can be used for unkown video classification.
+The following README outlines the basic functionality of the system.  
 
 ## Requirements
 Thirdeye requires python3.6 or later. Hardware requirements for thirdeye are more or less in-line with the requirements for [TensorFlow](https://www.tensorflow.org/install). TensorFlow is tested and supported on the following 64-bit systems:
@@ -36,9 +37,19 @@ In addition, around _____________ disk space is required, ____________ including
 - Ensure all dependencies are satisfied.
 - Navigate to the thirdeye directory in the command line.  
 - Run the *example.py* file to run an example classification of sample videos included in the data folder.
+
 ```
 python example.py
 ```
+
+Use the following code-names to select a network using ``` set_network() ```
+- *providence_v1*
+- *providence_v2*
+- *odin_v1*
+- *odin_v2*
+- *horus*
+
+For further questions on the network designs or Thirdeye in general, please contact mahesha.kulatunga@gmail.com.
 
 ## How do I train a network?
 - Ensure training files are stored in the ``` ./Data/TRAIN/DF_RAW ``` and  ``` ./Data/TRAIN/REAL_RAW ```
@@ -52,7 +63,7 @@ t = thirdeye.Thirdeye()
 ```
 t.perform_preprocessing()
 ```
-- Set the network to any desired; choose from *providence*, *odin* and *horus*.
+- Set the network to any desired; choose from *providence_v1*, *providence_v2*, *odin_v1*, *odin_v2* and *horus*.
 ```
 t.set_network(<network>)
 ```
