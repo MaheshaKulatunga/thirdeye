@@ -1,7 +1,7 @@
 # thirdeye
 > *An effort to ensure seeing remains believing*
 
-Thirdeye is a comprehensive system for deepfake video detection developed by [Mahesha Kulatunga](http://maheshak.com/) for a MSc Data Analytics dissertation while at The University of Warwick. This code base handles the preprocessing, training and evaluating required when creating neural networks for video classification. Included are 5 pre-trained 3D CNN architectures that can be used for unkown video classification.
+Thirdeye is a comprehensive system for deepfake video detection developed by [Mahesha Kulatunga](http://maheshak.com/) for a MSc Data Analytics dissertation while at The University of Warwick. This code base handles the preprocessing, training and evaluating required when creating neural networks for video classification. Included are 5 pre-trained 3D CNN architectures that can be used for uknown video classification.
 The following README outlines the basic functionality of the system.  
 
 ## Requirements
@@ -12,7 +12,7 @@ Thirdeye requires python3.6 or later. Hardware requirements for Thirdeye are mor
 - macOS 10.12.6 (Sierra) or later (no GPU support)
 - Raspbian 9.0 or later
 
-In addition, around _____________ disk space is required, ____________ including the DFD dataset.
+In addition, around 9GB disk space is required including saved models and the DFD dataset.
 
 ### Dependencies
 #### Python Version
